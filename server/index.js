@@ -7,7 +7,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allows any origin to connect (useful since frontend URL is unknown)
+    callback(null, true);
+  },
   credentials: true
 }));
 app.use(express.json());
