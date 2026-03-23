@@ -1,0 +1,16 @@
+node_modules/
+client/node_modules/
+server/node_modules/
+.env
+server/.env
+*.log
+dist/
+client/dist/
+uploads/
+.vscode/
+.idea/
+.DS_Store
+test_publish.js
+debug.log
+server/debug.log
+supabase_schema.sql
