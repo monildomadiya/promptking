@@ -125,7 +125,7 @@ router.get('/get_data', async (req, res) => {
     res.json({ prompts, likes, categories: categoriesRows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch data" });
+    res.status(500).json({ error: "Failed to fetch data", details: String(error) });
   }
 });
 
