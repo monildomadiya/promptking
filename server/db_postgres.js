@@ -1,10 +1,19 @@
 const postgres = require('postgres');
 require('dotenv').config();
 
-const connectionString = process.env.DATABASE_URL;
+let connectionString = process.env.DATABASE_URL;
 
-if (!connectionString || connectionString.includes('user:password')) {
-  console.error('ERROR: DATABASE_URL is not set or contains placeholders in .env');
+// Automatically handle unescaped '@' in passwords (common issue)
+if (connectionString && !connectionString.includes('%40')) {
+  // Try to find if there are multiple '@' symbols. If so, encode the password portion.
+  const parts = connectionString.split('@');
+  if (parts.length > 2) {
+    // Format: postgresql://user:password@host:port/db
+    // If multiple @ exist, the last one is the host delimiter.
+    const hostPart = parts.pop();
+    const userPassPart = parts.join('@');
+    connectionString = `${userPassPart.replace(/:(.*)$/, (match, p1) => `:${encodeURIComponent(p1)}`)}@${hostPart}`;
+  }
 }
 
 const sql = postgres(connectionString, {
