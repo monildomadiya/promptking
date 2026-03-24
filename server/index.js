@@ -18,11 +18,18 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
+app.set('trust proxy', 1); // Trust Render proxy for secure cookies
+
+const isProd = process.env.RENDER === 'true' || process.env.NODE_ENV === 'production';
+
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { 
+    secure: !!isProd, 
+    sameSite: isProd ? 'none' : 'lax'
+  }
 }));
 
 // Basic route
