@@ -549,6 +549,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       await api.post('/admin/login', { password });
+      localStorage.setItem('adminPin', password);
       setIsAdmin(true);
       fetchData('prompts');
     } catch (e) { alert("Invalid PIN"); }
@@ -556,6 +557,7 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     await api.get('/admin/logout');
+    localStorage.removeItem('adminPin');
     setIsAdmin(false);
   };
 

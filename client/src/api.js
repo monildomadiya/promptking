@@ -8,6 +8,14 @@ const api = axios.create({
   withCredentials: true
 });
 
+api.interceptors.request.use(config => {
+  const adminPin = localStorage.getItem('adminPin');
+  if (adminPin) {
+    config.headers['X-Admin-Pin'] = adminPin;
+  }
+  return config;
+});
+
 // Recursively prepend the SERVER_URL to any relative /uploads/ paths
 const transformUploadPaths = (data) => {
   if (!data) return data;
