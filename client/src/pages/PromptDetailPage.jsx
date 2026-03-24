@@ -230,20 +230,52 @@ const PromptDetailPage = ({ user, adsSettings }) => {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '40px' }} className="detail-layout">
           
           {/* Main Content (Left) */}
-          <div ref={contentRef} className="detail-main glass-panel" style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            borderRadius: '32px',
-            padding: '40px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)'
-          }}>
-            <div style={{
-              transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              marginBottom: '40px'
+          <div ref={contentRef} className="detail-main-content">
+            
+            {/* Header Section: Title & Stats */}
+            <div style={{ marginBottom: '35px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '12px' }}>
+                <span className={`badge ${badgeClass}`} style={{ 
+                  fontSize: '0.75rem', 
+                  padding: '6px 16px',
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${brandColor || 'rgba(255,255,255,0.1)'}`,
+                  color: brandColor || 'white'
+                }}>{prompt.aiType || 'AI'}</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', fontWeight: 600 }}>
+                  <Activity size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
+                  {prompt.copyCount || 0} Successful Copies
+                </span>
+              </div>
+              <h1 style={{ 
+                fontSize: '2.4rem', 
+                fontWeight: 900, 
+                marginBottom: '10px', 
+                lineHeight: 1.1, 
+                letterSpacing: '-1px',
+                background: 'linear-gradient(to right, #fff, rgba(255,255,255,0.7))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>{prompt.title}</h1>
+            </div>
+
+            {/* Hero Section: Image Display */}
+            <div className="hero-section glass-panel" style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderRadius: '32px',
+              padding: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+              marginBottom: '40px',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', marginBottom: '40px', position: 'relative' }}>
+              <div style={{ borderRadius: '24px', overflow: 'hidden', position: 'relative' }}>
                 {prompt.isImageSlider ? (
                   <div className="slider-container" style={{ position: 'relative', aspectRatio: (prompt.image_ratio || prompt.imageRatio || '16 / 9').replace(/\s+/g, ' ').trim(), width: '100%' }}>
                     <img src={prompt.imgAfter} alt="After" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -274,79 +306,61 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                   </div>
                 )}
                 
-                
-                {/* Premium Icon (Detail) */}
                 {prompt?.isPremium && (
-                  <div style={{ position: 'absolute', top: '30px', right: '30px', zIndex: 100 }}>
+                  <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 100 }}>
                     <div style={{
-                      background: 'rgba(0,0,0,0.3)',
+                      background: 'rgba(0,0,0,0.4)',
                       backdropFilter: 'blur(10px)',
                       WebkitBackdropFilter: 'blur(10px)',
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       borderRadius: '50%',
-                      width: '50px',
-                      height: '50px',
+                      width: '46px',
+                      height: '46px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                      justifyContent: 'center'
                     }}>
-                      <Crown size={24} fill="#FFD700" color="#FFD700" />
+                      <Crown size={22} fill="#FFD700" color="#FFD700" />
                     </div>
                   </div>
                 )}
               </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{prompt.copyCount || 0} Copies Created</span>
-              </div>
-
-              <h1 style={{ fontSize: '1.8rem', fontWeight: 600, marginBottom: '25px', lineHeight: 1.2, color: 'rgba(255, 255, 255, 0.9)' }}>{prompt.title}</h1>
             </div>
 
+            {/* Interactive Vault Section */}
             <div id="box-detail" className={`prompt-area ${isUnlocked ? 'unlocked' : ''}`} style={{
               background: 'rgba(15, 15, 20, 0.4)', 
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              borderRadius: '30px', 
+              borderRadius: '32px', 
               position: 'relative', 
               overflow: 'hidden',
               display: 'flex', 
               flexDirection: 'column', 
-              marginBottom: '30px', 
+              marginBottom: '40px', 
               border: isUnlocked ? (prompt.isPremium ? '2px solid #FFD700' : '2px solid var(--accent-main)') : '1px solid rgba(255,255,255,0.08)',
-              boxShadow: isUnlocked ? (prompt.isPremium ? '0 0 40px rgba(255, 215, 0, 0.25)' : '0 0 40px rgba(229, 9, 20, 0.3)') : 'none',
-              transform: isUnlocked ? 'scale(1.02)' : 'scale(1)',
-              minHeight: isUnlocked ? '180px' : '160px',
-              transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+              boxShadow: isUnlocked ? (prompt.isPremium ? '0 15px 50px rgba(255, 215, 0, 0.15)' : '0 15px 50px rgba(229, 9, 20, 0.2)') : 'none',
+              transform: isUnlocked ? 'scale(1.01)' : 'scale(1)',
+              minHeight: isUnlocked ? '200px' : '180px',
+              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
-              {/* macOS Style Header */}
-              <div style={{ background: 'transparent', padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF5F56' }}></div>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FFBD2E' }}></div>
-                  <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#27C93F' }}></div>
+              {/* Vault Header */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '15px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FF5F56', opacity: 0.8 }}></div>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FFBD2E', opacity: 0.8 }}></div>
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#27C93F', opacity: 0.8 }}></div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span className={`badge ${badgeClass}`} style={{ 
-                    fontSize: '0.7rem', 
-                    padding: '4px 12px',
-                    borderRadius: '8px',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${brandColor || 'rgba(255,255,255,0.2)'}`,
-                    color: brandColor || 'white',
-                    letterSpacing: '0.5px'
-                  }}>{prompt.aiType || 'AI'}</span>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  {isUnlocked ? 'Encrypted Data Accessed' : 'Security Vault Locked'}
                 </div>
               </div>
               
               <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ 
-                  position: 'absolute', inset: 0, padding: '20px 20px 60px 20px', fontFamily: 'monospace', fontSize: '0.85rem', color: '#eee', lineHeight: 1.7,
-                  filter: (isUnlocked) ? 'none' : 'blur(10px)', 
-                  WebkitFilter: (isUnlocked) ? 'none' : 'blur(10px)',
+                  position: 'absolute', inset: 0, padding: '25px', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.9rem', color: '#fff', lineHeight: 1.8,
+                  filter: (isUnlocked) ? 'none' : 'blur(12px)', 
+                  WebkitFilter: (isUnlocked) ? 'none' : 'blur(12px)',
                   userSelect: (isUnlocked) ? 'text' : 'none', 
                   overflowY: (isUnlocked) ? 'auto' : 'hidden'
                 }}>
@@ -358,85 +372,79 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                     onClick={handleCopy}
                     style={{
                       position: 'absolute',
-                      bottom: '12px',
-                      right: '12px',
-                      background: isCopied ? '#27C93F' : 'rgba(255,255,255,0.1)',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      color: 'white',
-                      padding: '8px 15px',
-                      borderRadius: '10px',
+                      bottom: '20px',
+                      right: '20px',
+                      background: isCopied ? '#27C93F' : 'white',
+                      border: 'none',
+                      color: isCopied ? 'white' : 'black',
+                      padding: '10px 24px',
+                      borderRadius: '14px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
+                      gap: '8px',
+                      fontSize: '0.85rem',
+                      fontWeight: 800,
                       cursor: 'pointer',
-                      backdropFilter: 'blur(10px)',
                       zIndex: 20,
-                      transition: 'all 0.3s ease'
+                      transition: '0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
                     }}
                   >
-                    {isCopied ? <Check size={14} /> : <Copy size={14} />}
-                    {isCopied ? 'Copy' : 'Copy'}
+                    {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                    {isCopied ? 'Copied' : 'Copy Prompt'}
                   </button>
                 )}
 
                 {!isUnlocked && (
                   <div style={{ 
-                    position: 'absolute', inset: 0, background: 'rgba(10, 10, 12, 0.85)', 
-                    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '25px 15px', zIndex: 10, gap: '15px'
+                    position: 'absolute', inset: 0, background: 'rgba(10, 10, 12, 0.8)', 
+                    backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '30px', zIndex: 10, gap: '20px'
                   }}>
-                    <div style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      width: '100%'
-                    }}>
-                      <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <div style={{ width: '100%', maxWidth: '200px' }}>
+                      <form onSubmit={(e) => e.preventDefault()}>
                         <input 
                           type="password" 
                           placeholder="••••" 
                           value={pin}
                           onChange={(e) => checkAutoUnlock(e.target.value)}
                           style={{ 
-                            width: '160px',
-                            height: '50px',
-                            borderRadius: '100px',
-                            border: showError ? '2px solid #ff4444' : '1px solid rgba(255,255,255,0.2)',
-                            background: 'rgba(255,255,255,0.08)',
+                            width: '100%',
+                            height: '55px',
+                            borderRadius: '16px',
+                            border: showError ? '2px solid #ff4444' : '1px solid rgba(255,255,255,0.15)',
+                            background: 'rgba(255,255,255,0.05)',
                             color: 'white', 
                             textAlign: 'center', 
                             outline: 'none', 
-                            letterSpacing: '10px', 
-                            fontSize: '1.4rem', 
+                            letterSpacing: '8px', 
+                            fontSize: '1.6rem', 
                             transition: 'all 0.3s ease',
-                            backdropFilter: 'blur(10px)',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                            backdropFilter: 'blur(10px)'
                           }} 
                         />
                       </form>
                     </div>
 
-                    {showError && <p style={{ color: '#ff4444', fontSize: '0.75rem', marginTop: '8px', fontWeight: 600 }}>Incorrect PIN</p>}
+                    {showError && <p style={{ color: '#ff4444', fontSize: '0.8rem', fontWeight: 700 }}>Verification Failed</p>}
                     
                     {prompt.igLink && (
                       <button 
                         onClick={() => setShowVideoModal(true)}
                         style={{ 
-                          background: 'transparent', 
-                          fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: '8px', 
-                          textDecoration: 'none', border: 'none', cursor: 'pointer',
+                          background: 'rgba(255,255,255,0.03)', 
+                          fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: '8px', 
+                          padding: '8px 16px', borderRadius: '10px',
+                          textDecoration: 'none', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer',
                           transition: 'all 0.3s ease'
                         }}
-                        onMouseOver={(e) => { e.currentTarget.style.color = 'white'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+                        onMouseOver={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
                       >
                         {prompt.igLink.includes('instagram') ? (
-                          <Instagram size={16} color="currentColor" />
+                          <Instagram size={14} />
                         ) : (
-                          <Youtube size={16} color="currentColor" />
+                          <Youtube size={14} />
                         )}
                         Get PIN from {prompt.igLink.includes('instagram') ? 'Reel' : 'Short'}
                       </button>
@@ -457,27 +465,36 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                 onClick={handleCopy}
                 style={{
                   width: '100%', background: isCopied ? 'var(--success)' : 'white', color: isCopied ? 'white' : 'black',
-                  border: 'none', padding: '16px', borderRadius: '50px', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.4s',
-                  boxShadow: isCopied ? '0 0 30px rgba(39, 201, 63, 0.3)' : '0 10px 20px rgba(0,0,0,0.3)',
-                  marginBottom: '20px'
+                  border: 'none', padding: '18px', borderRadius: '20px', fontWeight: 900, fontSize: '1.1rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: '0.3s ease',
+                  boxShadow: isCopied ? '0 0 30px rgba(39, 201, 63, 0.3)' : '0 10px 30px rgba(0,0,0,0.3)',
+                  marginBottom: '30px'
                 }}
               >
-                {isCopied ? <><Check size={22} /> Copied to Clipboard!</> : <><Copy size={22} /> Copy Full Prompt</>}
+                {isCopied ? <><Check size={22} /> Copied!</> : <><Copy size={22} /> Copy Full Prompt</>}
               </button>
             )}
 
             {/* In-Content Ad Placement */}
             {adsSettings?.adsense_enabled === '1' && adsSettings?.adsense_slot_detail && (
-              <AdSenseUnit client={adsSettings.adsense_client_id} slot={adsSettings.adsense_slot_detail} />
+              <div style={{ marginBottom: '40px' }}>
+                <AdSenseUnit client={adsSettings.adsense_client_id} slot={adsSettings.adsense_slot_detail} />
+              </div>
             )}
 
-            <div style={{
-              transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+            {/* Content Section: Description */}
+            <div className="detail-description-section" style={{
+              padding: '20px 0'
             }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
+                <div style={{ width: '4px', height: '24px', background: 'var(--accent-main)', borderRadius: '2px' }} />
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.3px', margin: 0 }}>
+                  Logic & Instructions
+                </h3>
+              </div>
               <div 
                 className="blog-content" 
-                style={{ color: '#ccc', lineHeight: 1.8, fontSize: '1.1rem', marginBottom: '40px' }}
+                style={{ color: 'rgba(255,255,255,0.7)', lineHeight: 1.9, fontSize: '1.1rem' }}
                 dangerouslySetInnerHTML={{ __html: prompt.description || '' }}
               />
             </div>
