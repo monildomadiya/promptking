@@ -140,19 +140,19 @@ const PromptList = ({ user, search, filter, setFilter, showFilters, isMobile }) 
                     background: isFilterOpen ? 'var(--accent-main)' : 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     color: 'white',
-                    padding: '10px 24px',
+                    padding: isMobile ? '8px 18px' : '10px 24px',
                     borderRadius: '50px',
-                    fontSize: '0.9rem',
+                    fontSize: isMobile ? '0.8rem' : '0.9rem',
                     fontWeight: 700,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
+                    gap: isMobile ? '6px' : '10px',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
                     backdropFilter: 'blur(10px)'
                   }}
                 >
-                  <Filter size={18} />
+                  <Filter size={isMobile ? 14 : 18} />
                   {filter === 'all' ? 'All Categories' : filter.charAt(0).toUpperCase() + filter.slice(1)}
                 </button>
 
