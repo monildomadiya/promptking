@@ -292,13 +292,13 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                     <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '3px', background: 'white', zIndex: 3, transform: 'translateX(-50%)' }}>
                       <div style={{ 
                         position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
-                        background: 'white', color: 'black', borderRadius: '50%', width: '40px', height: '40px', 
+                        background: 'white', color: 'black', borderRadius: '50%', width: '42px', height: '42px', 
                         display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                        fontSize: '12px', fontWeight: 900, boxShadow: '0 0 20px rgba(0,0,0,0.5)',
-                        whiteSpace: 'nowrap', gap: '4px'
+                        fontSize: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                        whiteSpace: 'nowrap', gap: '2px', border: '1px solid rgba(0,0,0,0.1)'
                       }}>
-                        <span>◀</span>
-                        <span>▶</span>
+                        <ArrowLeft size={14} strokeWidth={3} />
+                        <ArrowRight size={14} strokeWidth={3} />
                       </div>
                     </div>
                     <input 
