@@ -309,8 +309,18 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
                 zIndex: 2
               }} 
             />
-            <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '2px', background: 'white', zIndex: 3, transform: 'translateX(-50%)', pointerEvents: 'none' }}>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', color: 'black', borderRadius: '20px', padding: '8px 6px', fontSize: '10px', fontWeight: 900 }}>◀ ▶</div>
+            <div style={{ 
+              position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '2px', background: 'white', zIndex: 3, transform: 'translateX(-50%)', pointerEvents: 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <div style={{ 
+                background: 'white', color: 'black', borderRadius: '50%', width: '32px', height: '32px', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.3)', border: '1px solid rgba(0,0,0,0.05)'
+              }}>
+                <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '14px' }}></i>
+                <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '14px' }}></i>
+              </div>
             </div>
             <input 
               type="range" 

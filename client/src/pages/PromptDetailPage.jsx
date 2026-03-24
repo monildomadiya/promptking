@@ -297,8 +297,8 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                         fontSize: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                         whiteSpace: 'nowrap', gap: '2px', border: '1px solid rgba(0,0,0,0.1)'
                       }}>
-                        <ArrowLeft size={14} strokeWidth={3} />
-                        <ArrowRight size={14} strokeWidth={3} />
+                        <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '18px' }}></i>
+                        <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '18px' }}></i>
                       </div>
                     </div>
                     <input 
