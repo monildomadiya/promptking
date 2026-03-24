@@ -290,7 +290,16 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                       }} 
                     />
                     <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '3px', background: 'white', zIndex: 3, transform: 'translateX(-50%)' }}>
-                      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', color: 'black', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 900, boxShadow: '0 0 20px rgba(0,0,0,0.5)' }}>◀ ▶</div>
+                      <div style={{ 
+                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
+                        background: 'white', color: 'black', borderRadius: '50%', width: '40px', height: '40px', 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                        fontSize: '12px', fontWeight: 900, boxShadow: '0 0 20px rgba(0,0,0,0.5)',
+                        whiteSpace: 'nowrap', gap: '4px'
+                      }}>
+                        <span>◀</span>
+                        <span>▶</span>
+                      </div>
                     </div>
                     <input 
                       type="range" 
