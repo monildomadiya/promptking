@@ -44,6 +44,19 @@ app.use('/api', apiRoutes);
 // Serve uploads static folder
 app.use('/uploads', express.static('uploads'));
 
+// Global error handler (must be after routes)
+app.use((err, req, res, next) => {
+  console.error('GLOBAL SERVER ERROR:', err);
+  // Ensure CORS headers are present even on errors
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(500).json({ 
+    error: "Internal Server Error", 
+    message: err.message,
+    details: process.env.NODE_ENV === 'production' ? undefined : err.stack 
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
