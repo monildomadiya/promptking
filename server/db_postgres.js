@@ -53,7 +53,7 @@ try {
   sql = postgres(connectionString, {
     connect_timeout: 15,
     prepare: false,
-    ssl: { rejectUnauthorized: false }, // Most flexible for Supabase/Render
+    ssl: 'require', 
     onnotice: () => {},
   });
 } catch (initErr) {

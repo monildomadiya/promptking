@@ -32,9 +32,30 @@ app.use(session({
   }
 }));
 
-// Basic route
-app.get('/', (req, res) => {
-  res.send('PromptKing API is running...');
+// --- HEALTH CHECK (Diagnostic) ---
+app.get('/api/health-check', async (req, res) => {
+  const envKeys = Object.keys(process.env).filter(k => 
+    !k.includes('PASS') && !k.includes('SECRET') && !k.includes('URL') && !k.includes('KEY')
+  );
+  let dbStatus = "Checking...";
+  let dbError = null;
+  
+  try {
+    const db = require('./db_postgres');
+    await db`SELECT 1`;
+    dbStatus = "Connected";
+  } catch (err) {
+    dbStatus = "Failed";
+    dbError = err.message;
+  }
+  
+  res.json({
+    status: "online",
+    database: dbStatus,
+    databaseError: dbError,
+    activeEnvKeys: envKeys,
+    renderEnv: !!process.env.RENDER
+  });
 });
 
 // Import and use routes
