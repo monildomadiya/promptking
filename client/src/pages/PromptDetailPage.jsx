@@ -293,12 +293,12 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                       <div style={{ 
                         position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
                         background: 'white', color: 'black', borderRadius: '50%', width: '42px', height: '42px', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                        fontSize: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                        whiteSpace: 'nowrap', gap: '2px', border: '1px solid rgba(0,0,0,0.1)'
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.4)', border: '1px solid rgba(0,0,0,0.1)',
+                        flexShrink: 0
                       }}>
-                        <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '18px' }}></i>
-                        <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '18px' }}></i>
+                        <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '22px', display: 'inline-block', lineHeight: 1 }}></i>
+                        <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '22px', display: 'inline-block', lineHeight: 1 }}></i>
                       </div>
                     </div>
                     <input 

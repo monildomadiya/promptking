@@ -314,12 +314,13 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <div style={{ 
-                background: 'white', color: 'black', borderRadius: '50%', width: '32px', height: '32px', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.3)', border: '1px solid rgba(0,0,0,0.05)'
+                background: 'white', color: 'black', borderRadius: '50%', width: '38px', height: '38px', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.4)', border: '1px solid rgba(0,0,0,0.1)',
+                flexShrink: 0
               }}>
-                <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '14px' }}></i>
-                <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '14px' }}></i>
+                <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '20px', display: 'inline-block', lineHeight: 1 }}></i>
+                <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '20px', display: 'inline-block', lineHeight: 1 }}></i>
               </div>
             </div>
             <input 
