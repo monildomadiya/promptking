@@ -290,24 +290,28 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                       }} 
                     />
                     <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '3px', background: 'white', zIndex: 3, transform: 'translateX(-50%)' }}>
-                      <div style={{ 
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
-                        background: 'rgba(255, 255, 255, 0.4)', 
-                        color: 'black', 
-                        borderRadius: '30px', 
-                        width: '30px', 
-                        height: '56px', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        gap: '-10px',
-                        backdropFilter: 'blur(10px)',
-                        WebkitBackdropFilter: 'blur(10px)',
-                        boxShadow: 'none', 
-                        border: '1px solid rgba(255, 255, 255, 0.4)',
-                        flexShrink: 0
-                      }}>
+                      <div 
+                        className="slider-handle-glass"
+                        style={{ 
+                          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
+                          background: 'rgba(255, 255, 255, 0.4)', 
+                          color: 'black', 
+                          borderRadius: '30px', 
+                          width: '30px', 
+                          height: '56px', 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          gap: '-10px',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
+                          boxShadow: 'none', 
+                          border: '1px solid rgba(255, 255, 255, 0.4)',
+                          flexShrink: 0,
+                          transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                        }}
+                      >
                         <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '26px', display: 'block', lineHeight: 0.6, margin: 0 }}></i>
                         <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '26px', display: 'block', lineHeight: 0.6, margin: 0 }}></i>
                       </div>
@@ -659,6 +663,44 @@ const PromptDetailPage = ({ user, adsSettings }) => {
         @media (max-width: 768px) {
           .detail-main { border-radius: 15px !important; padding: 15px !important; }
           .prompt-area { border-radius: 15px !important; }
+        }
+        .slider-handle-glass {
+          transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        div:hover > .slider-handle-glass {
+          transform: translate(-50%, -50%) scale(1.1);
+          background: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        div:active > .slider-handle-glass {
+          transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .slider-handle-glass::after {
+          content: "";
+          position: absolute;
+          top: -50%;
+          left: -150%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            to right,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          transform: rotate(30deg);
+          animation: shimmer 3s infinite;
+          pointer-events: none;
+        }
+
+        @keyframes shimmer {
+          0% { left: -150%; }
+          50% { left: 150%; }
+          100% { left: 150%; }
         }
       `}</style>
     </div>

@@ -313,23 +313,27 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
               position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '2px', background: 'white', zIndex: 3, transform: 'translateX(-50%)', pointerEvents: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-              <div style={{ 
-                background: 'rgba(255, 255, 255, 0.4)', 
-                color: 'black', 
-                borderRadius: '20px', 
-                width: '26px', 
-                height: '44px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: '-8px',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                boxShadow: 'none', 
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                flexShrink: 0
-              }}>
+              <div 
+                className="slider-handle-glass"
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.4)', 
+                  color: 'black', 
+                  borderRadius: '20px', 
+                  width: '26px', 
+                  height: '44px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  gap: '-8px',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: 'none', 
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                  flexShrink: 0,
+                  transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                }}
+              >
                 <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '24px', display: 'block', lineHeight: 0.7, margin: 0 }}></i>
                 <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '24px', display: 'block', lineHeight: 0.7, margin: 0 }}></i>
               </div>
@@ -656,6 +660,41 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
           transform: translateY(-2px);
           box-shadow: 0 12px 24px rgba(229, 9, 20, 0.15) !important;
           border-color: rgba(229, 9, 20, 0.3) !important;
+        }
+        .slider-handle-glass {
+          transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .slider-container:hover .slider-handle-glass {
+          transform: translateX(-50%) scale(1.1);
+          background: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        .slider-container:active .slider-handle-glass {
+          transform: translateX(-50%) scale(0.95);
+        }
+
+        .slider-handle-glass::after {
+          content: "";
+          position: absolute;
+          top: -50%;
+          left: -150%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            to right,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          transform: rotate(30deg);
+          animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+          0% { left: -150%; }
+          50% { left: 150%; }
+          100% { left: 150%; }
         }
       `}</style>
     </div>
