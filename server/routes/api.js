@@ -11,7 +11,7 @@ if (!fs.existsSync(uploadDir)) { fs.mkdirSync(uploadDir, { recursive: true }); }
 const storage = multer.diskStorage({
   destination: (req, file, cb) => { cb(null, uploadDir); },
   filename: (req, file, cb) => {
-    const uid = req.session.userId;
+    const uid = req.headers['x-user-id'] || req.session.userId;
     const ext = path.extname(file.originalname);
     cb(null, `avatar_${uid}_${Date.now()}${ext}`);
   }
@@ -93,7 +93,7 @@ router.get('/logout', (req, res) => {
 
 // --- 2. FETCH PROMPTS & LIKES ---
 router.get('/get_data', async (req, res) => {
-  const uid = req.session.userId || null;
+  const uid = req.headers['x-user-id'] || req.session.userId || null;
   try {
     const promptsRows = await db`SELECT * FROM prompts`;
     const categoriesRows = await db`SELECT * FROM categories ORDER BY name ASC`;
@@ -212,7 +212,7 @@ router.get('/settings', async (req, res) => {
   }
 });
 router.post('/toggle_like', async (req, res) => {
-  const uid = req.session.userId;
+  const uid = req.headers['x-user-id'] || req.session.userId;
   if (!uid) return res.status(401).json({ error: "Not logged in" });
 
   const { key } = req.body;
@@ -235,7 +235,7 @@ router.post('/toggle_like', async (req, res) => {
 
 // --- 4. RECORD COPY ---
 router.post('/record_copy', async (req, res) => {
-  const uid = req.session.userId || null;
+  const uid = req.headers['x-user-id'] || req.session.userId || null;
   const { key } = req.body;
   try {
     await db`UPDATE prompts SET copy_count = copy_count + 1 WHERE prompt_key = ${key}`;
@@ -263,7 +263,7 @@ router.post('/record_unlock', async (req, res) => {
 
 // --- 5. GET USER PROFILE ---
 router.get('/get_profile', async (req, res) => {
-  const uid = req.session.userId;
+  const uid = req.headers['x-user-id'] || req.session.userId;
   if (!uid) return res.status(401).json({ error: "Not logged in" });
 
   try {
@@ -284,7 +284,7 @@ router.get('/get_profile', async (req, res) => {
 
 // --- 6. UPDATE USER PROFILE ---
 router.post('/update_profile', upload.single('avatar'), async (req, res) => {
-  const uid = req.session.userId;
+  const uid = req.headers['x-user-id'] || req.session.userId;
   if (!uid) return res.status(401).json({ error: "Not logged in" });
 
   const { name } = req.body;

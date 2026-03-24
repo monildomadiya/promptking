@@ -78,6 +78,7 @@ function AppContent() {
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        api.defaults.headers.common['X-User-Id'] = firebaseUser.uid;
         try {
           await api.post('/login', {
             uid: firebaseUser.uid,
@@ -91,6 +92,7 @@ function AppContent() {
           console.error("App: Backend login failed", error);
         }
       } else {
+        delete api.defaults.headers.common['X-User-Id'];
         setUser(null);
         setProfileData({ name: '', email: '', avatar_url: '' });
       }
