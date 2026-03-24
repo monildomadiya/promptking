@@ -9,6 +9,7 @@ if (!connectionString || connectionString.includes('user:password')) {
 
 const sql = postgres(connectionString, {
   connect_timeout: 10, // 10 seconds
+  prepare: false, // Required for Supabase PgBouncer / pooler
   onnotice: () => {},
 });
 
