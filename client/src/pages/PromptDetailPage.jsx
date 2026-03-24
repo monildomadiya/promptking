@@ -32,7 +32,20 @@ const PromptDetailPage = ({ user, adsSettings }) => {
     try {
       setLoading(true);
       const response = await api.get(`/prompt/${key}`);
-      setPrompt(response.data);
+      const p = response.data;
+      setPrompt({
+        ...p,
+        promptText: p.prompt_text || p.promptText,
+        imgAfter: p.img_after || p.imgAfter,
+        imgBefore: p.img_before || p.imgBefore,
+        isPremium: p.is_premium || p.isPremium,
+        aiType: p.ai_type || p.aiType,
+        imageRatio: p.image_ratio || p.imageRatio,
+        isImageSlider: p.is_image_slider || p.isImageSlider,
+        igLink: p.ig_link || p.igLink,
+        copyCount: p.copy_count || p.copy_count,
+        key: p.prompt_key || p.key
+      });
       setLoading(false);
     } catch (err) {
       console.error("Error fetching prompt:", err);
@@ -45,7 +58,16 @@ const PromptDetailPage = ({ user, adsSettings }) => {
     try {
       const response = await api.get('/get_data');
       if (response.data && response.data.prompts) {
-        setSuggestedPrompts(response.data.prompts.filter(p => p.key !== key).slice(0, 6));
+        const mapped = response.data.prompts.filter(p => p.prompt_key !== key && p.key !== key).map(p => ({
+          ...p,
+          promptText: p.prompt_text || p.promptText,
+          imgAfter: p.img_after || p.imgAfter,
+          imgBefore: p.img_before || p.imgBefore,
+          isPremium: p.is_premium || p.isPremium,
+          aiType: p.ai_type || p.aiType,
+          key: p.prompt_key || p.key
+        }));
+        setSuggestedPrompts(mapped.slice(0, 6));
       }
     } catch (err) {
       console.error("Error fetching suggestions:", err);
