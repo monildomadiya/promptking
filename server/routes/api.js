@@ -95,8 +95,13 @@ router.get('/logout', (req, res) => {
 router.get('/get_data', async (req, res) => {
   const uid = req.headers['x-user-id'] || req.session.userId || null;
   try {
+    console.log('Fetching initial website data...');
     const promptsRows = await db`SELECT * FROM prompts`;
+    console.log(`Found ${promptsRows.length} prompts in database.`);
+    
     const categoriesRows = await db`SELECT * FROM categories ORDER BY name ASC`;
+    console.log(`Found ${categoriesRows.length} categories in database.`);
+
     const prompts = promptsRows.map(row => ({
       ...row,
       isImageSlider: Boolean(row.is_image_slider),
@@ -124,7 +129,7 @@ router.get('/get_data', async (req, res) => {
     }
     res.json({ prompts, likes, categories: categoriesRows });
   } catch (error) {
-    console.error(error);
+    console.error('CRITICAL DATABASE FETCH ERROR:', error);
     res.status(500).json({ error: "Failed to fetch data", details: String(error) });
   }
 });
