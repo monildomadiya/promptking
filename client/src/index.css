@@ -214,7 +214,17 @@ button:active {
 /* Mobile */
 @media (max-width: 768px) {
   .masonry-grid {
-    column-count: 1;
+    column-count: unset;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .masonry-grid-item {
+    width: 100%;
+    max-width: 100vw;
+    margin-bottom: 0px; /* Overridden by gap */
+    display: block; /* Important for bleed layouts to prevent inline-block expansion */
   }
   
   /* Header mobile adjustments */
