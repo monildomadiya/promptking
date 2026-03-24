@@ -314,13 +314,24 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <div style={{ 
-                background: 'white', color: 'black', borderRadius: '50%', width: '38px', height: '38px', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.4)', border: '1px solid rgba(0,0,0,0.1)',
+                background: 'rgba(255, 255, 255, 0.4)', 
+                color: 'black', 
+                borderRadius: '20px', 
+                width: '26px', 
+                height: '44px', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '-8px',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: 'none', 
+                border: '1px solid rgba(255, 255, 255, 0.4)',
                 flexShrink: 0
               }}>
-                <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '20px', display: 'inline-block', lineHeight: 1 }}></i>
-                <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '20px', display: 'inline-block', lineHeight: 1 }}></i>
+                <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '24px', display: 'block', lineHeight: 0.7, margin: 0 }}></i>
+                <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '24px', display: 'block', lineHeight: 0.7, margin: 0 }}></i>
               </div>
             </div>
             <input 

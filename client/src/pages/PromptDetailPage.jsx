@@ -292,13 +292,24 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                     <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '3px', background: 'white', zIndex: 3, transform: 'translateX(-50%)' }}>
                       <div style={{ 
                         position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
-                        background: 'white', color: 'black', borderRadius: '50%', width: '42px', height: '42px', 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.4)', border: '1px solid rgba(0,0,0,0.1)',
+                        background: 'rgba(255, 255, 255, 0.4)', 
+                        color: 'black', 
+                        borderRadius: '30px', 
+                        width: '30px', 
+                        height: '56px', 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: '-10px',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        boxShadow: 'none', 
+                        border: '1px solid rgba(255, 255, 255, 0.4)',
                         flexShrink: 0
                       }}>
-                        <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '22px', display: 'inline-block', lineHeight: 1 }}></i>
-                        <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '22px', display: 'inline-block', lineHeight: 1 }}></i>
+                        <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '26px', display: 'block', lineHeight: 0.6, margin: 0 }}></i>
+                        <i className="fa fa-caret-right" aria-hidden="true" style={{ fontSize: '26px', display: 'block', lineHeight: 0.6, margin: 0 }}></i>
                       </div>
                     </div>
                     <input 
