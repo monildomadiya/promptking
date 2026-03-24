@@ -262,7 +262,7 @@ const PromptDetailPage = ({ user, adsSettings }) => {
   };
 
   return (
-    <div className="detail-page-wrapper" style={{ background: 'var(--bg-color)', minHeight: '100vh', color: 'white' }}>
+    <div className="detail-page-wrapper" style={{ background: 'var(--surface-0)', minHeight: '100vh', color: 'white' }}>
       <SEOMetadata 
         title={`${prompt.title} - AI Prompt | PromptKing`}
         description={prompt.description?.slice(0, 160)}
@@ -290,13 +290,10 @@ const PromptDetailPage = ({ user, adsSettings }) => {
             boxShadow: '0 25px 50px rgba(0,0,0,0.3)'
           }}>
             <div style={{
-              maxHeight: isUnlocked ? '0' : '1000px',
-              opacity: isUnlocked ? '0' : '1',
-              overflow: 'hidden',
               transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              marginBottom: isUnlocked ? '0' : '40px'
+              marginBottom: '40px'
             }}>
-              <div style={{ background: 'var(--surface-color)', borderRadius: '30px', border: '1px solid var(--border-color)', overflow: 'hidden', marginBottom: '40px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', marginBottom: '40px', position: 'relative' }}>
                 {prompt.isImageSlider ? (
                   <div className="slider-container" style={{ position: 'relative', aspectRatio: (prompt.image_ratio || prompt.imageRatio || '16 / 9').replace(/\s+/g, ' ').trim(), width: '100%' }}>
                     <img src={prompt.imgAfter} alt="After" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -537,7 +534,7 @@ const PromptDetailPage = ({ user, adsSettings }) => {
               videoUrl={prompt.igLink} 
             />
 
-            {(isUnlocked || !prompt.isPremium) && (
+            {(!isUnlocked && !prompt.isPremium) && (
               <button 
                 onClick={handleCopy}
                 style={{
@@ -558,9 +555,6 @@ const PromptDetailPage = ({ user, adsSettings }) => {
             )}
 
             <div style={{
-              maxHeight: isUnlocked ? '0' : '2000px',
-              opacity: isUnlocked ? '0' : '1',
-              overflow: 'hidden',
               transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
               <div 

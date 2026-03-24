@@ -300,12 +300,13 @@ const Header = ({ user, profileData, onProfileUpdate, search, setSearch, filter,
             
             {!isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                {/* Status Icons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <button 
-                    onClick={() => setFilter(filter === 'premium' ? 'all' : 'premium')}
-                    className="pro-card-hover"
-                    title="Premium Prompts"
+                {/* Status Icons - Only show on home page where filtering is active */}
+                {window.location.pathname === '/' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <button 
+                      onClick={() => setFilter(filter === 'premium' ? 'all' : 'premium')}
+                      className="pro-card-hover"
+                      title="Premium Prompts"
                     style={{ 
                       width: '42px', height: '42px', borderRadius: '50%', 
                       display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
@@ -337,6 +338,7 @@ const Header = ({ user, profileData, onProfileUpdate, search, setSearch, filter,
                     </button>
                   )}
                 </div>
+              )}
 
                 {/* User Actions */}
                 <nav style={{ display: 'flex', alignItems: 'center' }}>
