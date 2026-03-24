@@ -165,7 +165,7 @@ const Header = ({ user, profileData, onProfileUpdate, search, setSearch, filter,
                   src={settings.logo_url} 
                   alt="Logo" 
                   style={{ 
-                    width: isMobile ? `${settings.logo_width_mobile}px` : `${settings.logo_width_desktop}px`,
+                    width: isMobile ? `${settings.logo_width_mobile || 120}px` : `${settings.logo_width_desktop || 180}px`,
                     height: 'auto', 
                     objectFit: 'contain',
                     transition: '0.3s'
