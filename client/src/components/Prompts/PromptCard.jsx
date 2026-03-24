@@ -31,20 +31,15 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
   };
 
   React.useEffect(() => {
-    if ((isUnlocked || isHighlighted) && cardRef.current) {
-      const delay = isUnlocked ? 600 : 100;
+    if (isUnlocked && cardRef.current) {
       setTimeout(() => {
         cardRef.current.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'center'
         });
-        
-        if (isHighlighted && !isUnlocked) {
-          // Keep it simple, just scroll
-        }
-      }, delay);
+      }, 600);
     }
-  }, [isUnlocked, isHighlighted]);
+  }, [isUnlocked]);
 
   const ratio = (prompt.image_ratio || prompt.imageRatio || '16/9').toString().replace(/\s+/g, '').trim();
   const aiType = prompt.aiType || '';

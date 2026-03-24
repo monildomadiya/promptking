@@ -287,7 +287,10 @@ const Header = ({ user, profileData, onProfileUpdate, search, setSearch, filter,
                     <X 
                       size={20} 
                       style={{ position: 'absolute', right: '15px', color: 'var(--text-secondary)', cursor: 'pointer' }}
-                      onClick={() => setIsSearchExpanded(false)}
+                      onClick={() => {
+                        setSearch('');
+                        setIsSearchExpanded(false);
+                      }}
                     />
                   )}
                 </div>
