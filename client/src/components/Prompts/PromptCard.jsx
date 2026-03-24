@@ -201,21 +201,17 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
       await api.post('/record_copy', { key: prompt.key });
       setIsCopied(true);
       
-      // Relock automatically after 2 seconds so they can see the success state
+      // Start Thanos Snap immediately
+      setIsSnapping(true);
+      triggerSnapConfetti();
+      
+      // Wait for animation to finish before actual state lock
       setTimeout(() => {
+        setIsSnapping(false);
         setIsCopied(false);
-        
-        // Start Thanos Snap
-        setIsSnapping(true);
-        triggerSnapConfetti();
-        
-        // Wait for animation to finish before actual state lock
-        setTimeout(() => {
-          setIsSnapping(false);
-          onLock();
-          setPin(''); // Reset PIN for next time
-        }, 800);
-      }, 2000);
+        onLock();
+        setPin(''); // Reset PIN for next time
+      }, 800);
     } catch (err) {
       console.error('Failed to copy text: ', err);
     }

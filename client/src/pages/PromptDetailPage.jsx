@@ -213,12 +213,15 @@ const PromptDetailPage = ({ user, adsSettings }) => {
       await api.post('/record_copy', { key: prompt.key });
       setIsCopied(true);
       
-      // Relock automatically after 2 seconds
+      // Relock smoothly with a very short delay to instantly respond to the copy
+      setTimeout(() => {
+        setIsUnlocked(false);
+      }, 200);
+      
       setTimeout(() => {
         setIsCopied(false);
-        setIsUnlocked(false);
         setPin(''); // Reset PIN
-      }, 2000);
+      }, 800);
     } catch (err) {
       console.error('Failed to copy text: ', err);
     }
