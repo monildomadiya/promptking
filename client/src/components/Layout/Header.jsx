@@ -278,7 +278,7 @@ const Header = ({ user, profileData, onProfileUpdate, search, setSearch, filter,
                       width: '100%', 
                       padding: isMobile ? '10px 15px 10px 45px' : '12px 15px 12px 45px', 
                       borderRadius: '50px',
-                      fontSize: isMobile ? '0.85rem' : '0.9rem',
+                      fontSize: isMobile ? '16px' : '0.9rem',
                       border: '1px solid rgba(255,255,255,0.1)',
                       height: isMobile ? '45px' : '48px'
                     }} 
