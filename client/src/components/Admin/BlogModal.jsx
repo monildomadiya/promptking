@@ -165,50 +165,30 @@ const Label = ({ text, icon }) => (
 );
 
 const ImageUpload = ({ url, onUpload }) => {
-  const [isUploading, setIsUploading] = useState(false);
-  
   return (
-    <div style={{ 
-      height: '300px', borderRadius: '24px', border: '2px dashed rgba(255,255,255,0.1)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(255,255,255,0.02)', overflow: 'hidden', position: 'relative',
-      transition: '0.3s'
-    }}>
-      {url ? (
-        <>
-          <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', opacity: 0, transition: '0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onMouseOver={e=>e.currentTarget.style.opacity=1} onMouseOut={e=>e.currentTarget.style.opacity=0}>
-            <button type="button" onClick={() => document.getElementById(`file-blog`).click()} className="glass-button-secondary" style={{ padding: '12px 25px', borderRadius: '12px' }}>Replace Image</button>
-          </div>
-        </>
-      ) : (
-        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }}>
-          <div style={{ width: '60px', height: '60px', background: 'rgba(255,255,255,0.05)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
-            <Camera size={28} />
-          </div>
-          <p style={{ fontSize: '1rem', fontWeight: 700, color: 'white', marginBottom: '5px' }}>{isUploading ? 'Uploading Art...' : 'Upload Featured Image'}</p>
-          <p style={{ fontSize: '0.8rem', opacity: 0.6 }}>Ideal size: 1200x630 (PNG, JPG, WebP)</p>
-        </div>
-      )}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <input 
-        type="file" 
-        id={`file-blog`}
-        hidden 
-        accept="image/*" 
-        onChange={async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          setIsUploading(true);
-          const uploadData = new FormData();
-          uploadData.append('image', file);
-          try {
-            const res = await api.post('/admin/upload_image', uploadData);
-            onUpload(res.data.imageUrl);
-          } catch (err) { alert("Upload failed"); }
-          finally { setIsUploading(false); }
-        }}
+        type="text" 
+        placeholder="https://..."
+        value={url || ''}
+        onChange={(e) => onUpload(e.target.value)}
+        className="glass-input"
+        style={{ width: '100%', padding: '14px 18px', borderRadius: '14px', fontSize: '0.9rem', color: 'white', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', outline: 'none' }}
       />
-      {!url && !isUploading && <div onClick={() => document.getElementById(`file-blog`).click()} style={{ position: 'absolute', inset: 0, cursor: 'pointer' }} />}
+      <div style={{ 
+        height: '240px', borderRadius: '20px', border: '2px dashed rgba(255,255,255,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(255,255,255,0.02)', overflow: 'hidden'
+      }}>
+        {url ? (
+          <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)' }}>
+            <Camera size={32} style={{ marginBottom: '10px', opacity: 0.5 }} />
+            <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>Image Preview</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

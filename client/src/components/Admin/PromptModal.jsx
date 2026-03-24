@@ -355,41 +355,29 @@ const RatioButton = ({ ratio, active, onClick }) => (
 );
 
 const ImageUpload = ({ url, onUpload }) => (
-  <div style={{ 
-    height: '180px', borderRadius: '20px', border: '2px dashed rgba(255,255,255,0.1)',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    background: 'rgba(255,255,255,0.02)', overflow: 'hidden', position: 'relative'
-  }}>
-    {url ? (
-      <>
-        <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0, transition: '0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onMouseOver={e=>e.currentTarget.style.opacity=1} onMouseOut={e=>e.currentTarget.style.opacity=0}>
-          <button type="button" onClick={() => document.getElementById(`file-${url}`).click()} className="glass-button-secondary" style={{ padding: '8px 15px' }}>Change Image</button>
-        </div>
-      </>
-    ) : (
-      <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }}>
-        <Camera size={32} style={{ marginBottom: '10px', opacity: 0.5 }} />
-        <p style={{ fontSize: '0.8rem', fontWeight: 600 }}>Click to Upload</p>
-      </div>
-    )}
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
     <input 
-      type="file" 
-      id={`file-${url}`}
-      hidden 
-      accept="image/*" 
-      onChange={async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const uploadData = new FormData();
-        uploadData.append('image', file);
-        try {
-          const res = await api.post('/admin/upload_image', uploadData);
-          onUpload(res.data.imageUrl);
-        } catch (err) { alert("Upload failed"); }
-      }}
+      type="text" 
+      placeholder="https://..."
+      value={url || ''}
+      onChange={(e) => onUpload(e.target.value)}
+      className="glass-input"
+      style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', fontSize: '0.85rem', color: 'white', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', outline: 'none' }}
     />
-    {!url && <div onClick={() => document.getElementById(`file-${url}`).click()} style={{ position: 'absolute', inset: 0, cursor: 'pointer' }} />}
+    <div style={{ 
+      height: '140px', borderRadius: '16px', border: '2px dashed rgba(255,255,255,0.1)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(255,255,255,0.02)', overflow: 'hidden'
+    }}>
+      {url ? (
+        <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.2)' }}>
+          <Image size={24} style={{ marginBottom: '8px' }} />
+          <p style={{ fontSize: '0.75rem', fontWeight: 600 }}>Image Preview</p>
+        </div>
+      )}
+    </div>
   </div>
 );
 

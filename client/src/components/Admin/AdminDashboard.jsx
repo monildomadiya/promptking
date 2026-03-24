@@ -240,17 +240,14 @@ const BrandingPanel = ({ onSave }) => {
             )}
           </div>
           <div style={{ position: 'relative' }}>
-             <button className="glass-button-secondary" style={{ width: '100%', padding: '14px', borderRadius: '12px', fontWeight: 700 }}>
-               Upload New Logo
-             </button>
-             <input type="file" onChange={async (e) => {
-                const file = e.target.files[0];
-                if(!file) return;
-                const formData = new FormData();
-                formData.append('logo', file);
-                const res = await api.post('/admin/upload_logo', formData);
-                setSettings({ ...settings, logo_url: res.data.logoUrl });
-             }} style={{ position: 'absolute', inset:0, opacity: 0, cursor: 'pointer' }} />
+             <input 
+               type="text" 
+               className="glass-input" 
+               placeholder="Paste logo URL here..."
+               value={settings.logo_url || ''}
+               onChange={(e) => setSettings({ ...settings, logo_url: e.target.value })}
+               style={{ width: '100%', padding: '14px', borderRadius: '12px', fontWeight: 500, fontSize: '0.9rem', color: 'white', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', outline: 'none' }}
+             />
           </div>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>SVG or PNG with transparency recommended.</p>
         </div>
