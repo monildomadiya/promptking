@@ -130,82 +130,7 @@ const PromptDetailPage = ({ user, adsSettings }) => {
     }
   };
 
-  const handleLikeWithEffect = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    // Heart confetti logic
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (rect.left + rect.width / 2) / window.innerWidth;
-    const y = (rect.top + rect.height / 2) / window.innerHeight;
-    
-    const scalar = 2;
-    const heart = confetti.shapeFromPath({ path: 'M0 10 C0 6, 3 2, 10 2 C15 2, 20 6, 20 10 C20 18, 10 28, 10 28 C10 28, 0 18, 0 10' });
 
-    confetti({
-      shapes: [heart],
-      particleCount: 40,
-      spread: 70,
-      origin: { x, y },
-      colors: ['#e50914', '#ff4b2b', '#ff416c'],
-      scalar
-    });
-
-    handleLike();
-  };
-
-  const AuthHint = () => (
-    <div style={{
-      position: 'absolute',
-      bottom: '100%',
-      right: '0',
-      marginBottom: '10px',
-      background: 'rgba(229, 9, 20, 0.95)',
-      backdropFilter: 'blur(10px)',
-      color: 'white',
-      padding: '8px 16px',
-      borderRadius: '12px',
-      fontSize: '0.8rem',
-      fontWeight: 800,
-      whiteSpace: 'nowrap',
-      zIndex: 110,
-      boxShadow: '0 10px 30px rgba(229, 9, 20, 0.4)',
-      animation: 'fadeUp 0.3s ease-out forwards',
-      pointerEvents: 'none'
-    }}>
-      Login to Save Likes
-      <div style={{
-        position: 'absolute',
-        top: '100%',
-        right: '15px',
-        width: '0',
-        height: '0',
-        borderLeft: '6px solid transparent',
-        borderRight: '6px solid transparent',
-        borderTop: '6px solid rgba(229, 9, 20, 0.95)'
-      }}></div>
-    </div>
-  );
-
-  const handleLike = async () => {
-    if (!user) {
-      setShowAuthHint(true);
-      setTimeout(() => setShowAuthHint(false), 3000);
-      window.dispatchEvent(new CustomEvent('openLogin', { 
-        detail: { message: 'Login required to save your likes' } 
-      }));
-      return;
-    }
-    try {
-      await api.post('/toggle_like', { key: prompt.key });
-      setPrompt(prev => ({
-        ...prev,
-        likes_count: (prev.likes_count || 0) + 1 // Optimistic update (simple)
-      }));
-    } catch (err) {
-      console.error('Failed to toggle like:', err);
-    }
-  };
 
   const handleCopy = async () => {
     try {
@@ -328,41 +253,9 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                 )}
                 
                 
-                {/* Floating Like Button for Detail Page */}
-                <div style={{ position: 'absolute', top: '30px', right: '30px', zIndex: 100 }}>
-                  <button 
-                    onClick={handleLikeWithEffect}
-                    style={{
-                      background: 'rgba(0,0,0,0.3)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '50%',
-                      width: '50px',
-                      height: '50px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'rgba(0,0,0,0.3)'; }}
-                  >
-                    {showAuthHint && <AuthHint />}
-                    <Heart 
-                      size={24} 
-                      fill={prompt?.isLiked ? '#e50914' : 'none'} 
-                      color={prompt?.isLiked ? '#e50914' : 'white'} 
-                      style={{ transition: '0.3s' }}
-                    />
-                  </button>
-                </div>
-                
-                {/* Premium Icon Near Like (Detail) */}
+                {/* Premium Icon (Detail) */}
                 {prompt?.isPremium && (
-                  <div style={{ position: 'absolute', top: '30px', right: '85px', zIndex: 100 }}>
+                  <div style={{ position: 'absolute', top: '30px', right: '30px', zIndex: 100 }}>
                     <div style={{
                       background: 'rgba(0,0,0,0.3)',
                       backdropFilter: 'blur(10px)',
