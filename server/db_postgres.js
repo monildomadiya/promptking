@@ -3,25 +3,36 @@ require('dotenv').config();
 
 let connectionString = process.env.DATABASE_URL;
 
+console.log('--- DATABASE INITIALIZATION ---');
+if (!connectionString) {
+  console.error('CRITICAL: DATABASE_URL environment variable is missing!');
+} else {
+  const maskedUrl = connectionString.replace(/:([^:@]+)@/, ':****@');
+  console.log(`Connecting to: ${maskedUrl}`);
+}
+
 // Automatically handle unescaped '@' in passwords (common issue)
 if (connectionString && !connectionString.includes('%40')) {
-  // Try to find if there are multiple '@' symbols. If so, encode the password portion.
   const parts = connectionString.split('@');
   if (parts.length > 2) {
-    // Format: postgresql://user:password@host:port/db
-    // If multiple @ exist, the last one is the host delimiter.
     const hostPart = parts.pop();
     const userPassPart = parts.join('@');
     connectionString = `${userPassPart.replace(/:(.*)$/, (match, p1) => `:${encodeURIComponent(p1)}`)}@${hostPart}`;
+    console.log('Detected unescaped @ in password, auto-encoded for safety.');
   }
 }
 
-const sql = postgres(connectionString, {
-  connect_timeout: 10, // 10 seconds
-  prepare: false, // Required for Supabase PgBouncer / pooler
-  ssl: 'require', // Required for Supabase connections from external networks like Render
-  onnotice: () => {},
-});
+let sql;
+try {
+  sql = postgres(connectionString, {
+    connect_timeout: 15,
+    prepare: false,
+    ssl: { rejectUnauthorized: false }, // Most flexible for Supabase/Render
+    onnotice: () => {},
+  });
+} catch (initErr) {
+  console.error('SYNCHRONOUS DB INIT ERROR:', initErr);
+}
 
 // Test connection on startup
 (async () => {
