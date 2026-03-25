@@ -1,7 +1,19 @@
 import axios from 'axios';
 
-// Update this if the backend URL changes
-const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const getBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  
+  // Logic to detect if we are on the live site
+  if (typeof window !== 'undefined' && 
+      !window.location.hostname.includes('localhost') && 
+      !window.location.hostname.includes('127.0.0.1')) {
+    return 'https://promptking-q4qu.onrender.com';
+  }
+  
+  return 'http://localhost:5000';
+};
+
+const SERVER_URL = getBaseUrl();
 
 const api = axios.create({
   baseURL: `${SERVER_URL}/api`,
