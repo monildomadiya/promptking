@@ -6,12 +6,12 @@ import SocialSidebar from '../components/Prompts/SocialSidebar';
 import SEOMetadata from '../components/SEO/SEOMetadata';
 
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.1 } }
+  initial: { opacity: 1, y: 0 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0, staggerChildren: 0 } }
 };
 
 const itemVariants = {
-  initial: { opacity: 0, y: 10 },
+  initial: { opacity: 1, y: 0 },
   animate: { opacity: 1, y: 0 }
 };
 

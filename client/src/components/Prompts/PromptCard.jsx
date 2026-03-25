@@ -31,14 +31,7 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
   };
 
   React.useEffect(() => {
-    if (isUnlocked && cardRef.current) {
-      setTimeout(() => {
-        cardRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center'
-        });
-      }, 600);
-    }
+    // Scroll into view removed to eliminate scroll animation effects
   }, [isUnlocked]);
 
   const ratio = (prompt.image_ratio || prompt.imageRatio || '16/9').toString().replace(/\s+/g, '').trim();
@@ -263,8 +256,6 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
       border: isHighlighted ? '2px solid var(--accent-main)' : '1px solid rgba(255, 255, 255, 0.1)',
       borderRadius: '24px',
       padding: '18px',
-      opacity: 0,
-      animation: isHighlighted ? 'simpleHighlight 0.5s ease-out forwards' : 'fadeUp 0.6s ease-out forwards',
       zIndex: isHighlighted ? 10 : 1,
       transform: isHighlighted ? 'scale(1.02)' : 'scale(1)',
       transition: 'all 0.4s ease-in-out',
@@ -310,17 +301,17 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
               }} 
             />
             <div style={{ 
-              position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '2px', background: 'white', zIndex: 3, transform: 'translateX(-50%)', pointerEvents: 'none',
+              position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '2px', 
+              background: 'white', zIndex: 3, transform: 'translateX(-50%)', pointerEvents: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               <div 
-                className="slider-handle-glass"
                 style={{ 
-                  background: 'rgba(255, 255, 255, 0.4)', 
+                  background: 'rgba(255, 255, 255, 0.7)', 
                   color: 'black', 
                   borderRadius: '20px', 
-                  width: '26px', 
-                  height: '44px', 
+                  width: '24px', 
+                  height: '40px', 
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
@@ -328,10 +319,9 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
                   gap: '-8px',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
-                  boxShadow: 'none', 
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)', 
                   border: '1px solid rgba(255, 255, 255, 0.4)',
-                  flexShrink: 0,
-                  transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                  flexShrink: 0
                 }}
               >
                 <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '24px', display: 'block', lineHeight: 0.7, margin: 0 }}></i>
@@ -626,11 +616,6 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
         .gemini { color: #4285f4; background: rgba(66, 133, 244, 0.05) !important; border-color: rgba(66, 133, 244, 0.3) !important; }
         .midjourney { color: #a855f7; background: rgba(168, 85, 247, 0.05) !important; border-color: rgba(168, 85, 247, 0.3) !important; }
         
-        @keyframes simpleHighlight {
-          0% { opacity: 0; transform: translateY(10px) scale(1); }
-          100% { opacity: 1; transform: translateY(0) scale(1.02); }
-        }
-
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-3px); }
@@ -660,41 +645,6 @@ const PromptCard = ({ prompt, user, isLiked, onLikeToggle, isUnlocked, onUnlock,
           transform: translateY(-2px);
           box-shadow: 0 12px 24px rgba(229, 9, 20, 0.15) !important;
           border-color: rgba(229, 9, 20, 0.3) !important;
-        }
-        .slider-handle-glass {
-          transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .slider-container:hover .slider-handle-glass {
-          transform: translateX(-50%) scale(1.1);
-          background: rgba(255, 255, 255, 0.5) !important;
-        }
-
-        .slider-container:active .slider-handle-glass {
-          transform: translateX(-50%) scale(0.95);
-        }
-
-        .slider-handle-glass::after {
-          content: "";
-          position: absolute;
-          top: -50%;
-          left: -150%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            to right,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
-          );
-          transform: rotate(30deg);
-          animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-          0% { left: -150%; }
-          50% { left: 150%; }
-          100% { left: 150%; }
         }
       `}</style>
     </div>

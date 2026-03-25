@@ -104,17 +104,7 @@ const PromptDetailPage = ({ user, adsSettings }) => {
   const contentRef = React.useRef(null);
 
   useEffect(() => {
-    if (isUnlocked && contentRef.current) {
-      setTimeout(() => {
-        const promptBox = document.getElementById('box-detail');
-        if (promptBox) {
-          promptBox.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
-        }
-      }, 600);
-    }
+    // Scroll into view removed to eliminate scroll animation effects
   }, [isUnlocked]);
 
   const triggerConfetti = () => {
@@ -289,16 +279,18 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                         zIndex: 2
                       }} 
                     />
-                    <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '3px', background: 'white', zIndex: 3, transform: 'translateX(-50%)' }}>
+                    <div style={{ 
+                      position: 'absolute', top: 0, bottom: 0, left: `${sliderValue}%`, width: '3px', 
+                      background: 'white', zIndex: 3, transform: 'translateX(-50%)'
+                    }}>
                       <div 
-                        className="slider-handle-glass"
                         style={{ 
                           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
-                          background: 'rgba(255, 255, 255, 0.4)', 
+                          background: 'rgba(255, 255, 255, 0.7)', 
                           color: 'black', 
                           borderRadius: '30px', 
-                          width: '30px', 
-                          height: '56px', 
+                          width: '26px', 
+                          height: '52px', 
                           display: 'flex', 
                           flexDirection: 'column', 
                           alignItems: 'center', 
@@ -306,10 +298,9 @@ const PromptDetailPage = ({ user, adsSettings }) => {
                           gap: '-10px',
                           backdropFilter: 'blur(10px)',
                           WebkitBackdropFilter: 'blur(10px)',
-                          boxShadow: 'none', 
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.2)', 
                           border: '1px solid rgba(255, 255, 255, 0.4)',
-                          flexShrink: 0,
-                          transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                          flexShrink: 0
                         }}
                       >
                         <i className="fa fa-caret-left" aria-hidden="true" style={{ fontSize: '26px', display: 'block', lineHeight: 0.6, margin: 0 }}></i>
@@ -639,8 +630,8 @@ const PromptDetailPage = ({ user, adsSettings }) => {
       </div>
 
 <style>{`
-        .detail-page-wrapper { animation: fadeIn 0.6s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .detail-page-wrapper { animation: none; }
+        @keyframes fadeIn { from { opacity: 1; transform: translateY(0); } to { opacity: 1; transform: translateY(0); } }
         .back-link { transition: 0.3s; }
         .back-link:hover { color: white !important; transform: translateX(-5px); }
         .suggested-card-item:hover { 
@@ -663,44 +654,6 @@ const PromptDetailPage = ({ user, adsSettings }) => {
         @media (max-width: 768px) {
           .detail-main { border-radius: 15px !important; padding: 15px !important; }
           .prompt-area { border-radius: 15px !important; }
-        }
-        .slider-handle-glass {
-          transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          position: relative;
-          overflow: hidden;
-        }
-        
-        div:hover > .slider-handle-glass {
-          transform: translate(-50%, -50%) scale(1.1);
-          background: rgba(255, 255, 255, 0.5) !important;
-        }
-
-        div:active > .slider-handle-glass {
-          transform: translate(-50%, -50%) scale(0.95);
-        }
-
-        .slider-handle-glass::after {
-          content: "";
-          position: absolute;
-          top: -50%;
-          left: -150%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            to right,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
-          );
-          transform: rotate(30deg);
-          animation: shimmer 3s infinite;
-          pointer-events: none;
-        }
-
-        @keyframes shimmer {
-          0% { left: -150%; }
-          50% { left: 150%; }
-          100% { left: 150%; }
         }
       `}</style>
     </div>

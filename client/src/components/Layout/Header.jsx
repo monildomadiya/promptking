@@ -74,17 +74,7 @@ const Header = ({ user, profileData, onProfileUpdate, search, setSearch, filter,
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 20);
-
-      // Hide/Show logic for mobile header
-      if (window.innerWidth <= 768) {
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-          setIsVisible(false); // Scrolling down
-        } else {
-          setIsVisible(true); // Scrolling up
-        }
-      } else {
-        setIsVisible(true);
-      }
+      setIsVisible(true);
       setLastScrollY(currentScrollY);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });

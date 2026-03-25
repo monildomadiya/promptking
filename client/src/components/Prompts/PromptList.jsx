@@ -161,8 +161,7 @@ const PromptList = ({ user, search, filter, setFilter, showFilters, isMobile }) 
                     position: 'absolute', 
                     top: 'calc(100% + 15px)', 
                     right: 0, 
-                    zIndex: 1000,
-                    animation: 'fadeUp 0.3s ease-out'
+                    zIndex: 1000
                   }}>
                     <CategorySidebar 
                       filter={filter} 
