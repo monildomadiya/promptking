@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Update this if the backend URL changes
-const SERVER_URL = 'https://promptking-q4qu.onrender.com';
+const SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const api = axios.create({
   baseURL: `${SERVER_URL}/api`,
