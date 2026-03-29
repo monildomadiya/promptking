@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allows any origin to connect (useful since frontend URL is unknown)
     callback(null, true);
   },
   credentials: true
@@ -19,9 +18,9 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
-app.set('trust proxy', 1); // Trust Render proxy for secure cookies
+app.set('trust proxy', 1);
 
-const isProd = process.env.RENDER === 'true' || process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === 'production';
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'secret',
@@ -33,17 +32,14 @@ app.use(session({
   }
 }));
 
-// --- HEALTH CHECK (Diagnostic) ---
+// --- HEALTH CHECK ---
 app.get('/api/health-check', async (req, res) => {
-  const envKeys = Object.keys(process.env).filter(k => 
-    !k.includes('PASS') && !k.includes('SECRET') && !k.includes('URL') && !k.includes('KEY')
-  );
   let dbStatus = "Checking...";
   let dbError = null;
   
   try {
-    const db = require('./db_postgres');
-    await db`SELECT 1`;
+    const db = require('./db');
+    await db.query('SELECT 1');
     dbStatus = "Connected";
   } catch (err) {
     dbStatus = "Failed";
@@ -54,8 +50,7 @@ app.get('/api/health-check', async (req, res) => {
     status: "online",
     database: dbStatus,
     databaseError: dbError,
-    activeEnvKeys: envKeys,
-    renderEnv: !!process.env.RENDER
+    dbType: "MySQL"
   });
 });
 
@@ -66,10 +61,9 @@ app.use('/api', apiRoutes);
 // Serve uploads static folder
 app.use('/uploads', express.static('uploads'));
 
-// Global error handler (must be after routes)
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('GLOBAL SERVER ERROR:', err);
-  // Ensure CORS headers are present even on errors
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.header('Access-Control-Allow-Credentials', 'true');
   res.status(500).json({ 

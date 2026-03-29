@@ -14,3 +14,4 @@ test_publish.js
 debug.log
 server/debug.log
 supabase_schema.sql
+server/.env

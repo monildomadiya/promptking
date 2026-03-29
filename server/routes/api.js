@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db_postgres');
+const db = require('../db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -34,10 +34,10 @@ const generateUniqueSlug = async (title, currentId = null, table = 'prompts', id
   let exists = true;
 
   while (exists) {
-    const rows = await db`
-      SELECT ${db(idColumn)} FROM ${db(table)} 
-      WHERE slug = ${uniqueSlug} AND ${db(idColumn)} != ${currentId || ''}
-    `;
+    const [rows] = await db.query(
+      `SELECT ${idColumn} FROM ${table} WHERE slug = ? AND ${idColumn} != ?`,
+      [uniqueSlug, currentId || '']
+    );
     if (rows.length === 0) {
       exists = false;
     } else {
@@ -71,13 +71,11 @@ const logoUpload = multer({
 router.post('/login', async (req, res) => {
   const { uid, name, email, picture } = req.body;
   try {
-    await db`
-      INSERT INTO users (id, name, email, avatar_url) 
-      VALUES (${uid}, ${name}, ${email}, ${picture}) 
-      ON CONFLICT (id) DO UPDATE SET 
-        name = EXCLUDED.name, 
-        avatar_url = CASE WHEN users.avatar_url = '' THEN EXCLUDED.avatar_url ELSE users.avatar_url END
-    `;
+    await db.query(
+      `INSERT INTO users (id, name, email, avatar_url) VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE name = VALUES(name), avatar_url = CASE WHEN users.avatar_url IS NULL OR users.avatar_url = '' THEN VALUES(avatar_url) ELSE users.avatar_url END`,
+      [uid, name, email, picture]
+    );
     req.session.userId = uid;
     res.json({ status: "success" });
   } catch (error) {
@@ -95,12 +93,8 @@ router.get('/logout', (req, res) => {
 router.get('/get_data', async (req, res) => {
   const uid = req.headers['x-user-id'] || req.session.userId || null;
   try {
-    console.log('Fetching initial website data...');
-    const promptsRows = await db`SELECT * FROM prompts`;
-    console.log(`Found ${promptsRows.length} prompts in database.`);
-    
-    const categoriesRows = await db`SELECT * FROM categories ORDER BY name ASC`;
-    console.log(`Found ${categoriesRows.length} categories in database.`);
+    const [promptsRows] = await db.query('SELECT * FROM prompts');
+    const [categoriesRows] = await db.query('SELECT * FROM categories ORDER BY name ASC');
 
     const prompts = promptsRows.map(row => ({
       ...row,
@@ -124,7 +118,7 @@ router.get('/get_data', async (req, res) => {
 
     let likes = {};
     if (uid) {
-      const likeRows = await db`SELECT prompt_key FROM user_likes WHERE user_id = ${uid}`;
+      const [likeRows] = await db.query('SELECT prompt_key FROM user_likes WHERE user_id = ?', [uid]);
       likeRows.forEach(l => likes[l.prompt_key] = true);
     }
     res.json({ prompts, likes, categories: categoriesRows });
@@ -137,7 +131,7 @@ router.get('/get_data', async (req, res) => {
 // --- BLOGS (Public) ---
 router.get('/blogs', async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM blogs ORDER BY created_at DESC`;
+    const [rows] = await db.query('SELECT * FROM blogs ORDER BY created_at DESC');
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -148,7 +142,7 @@ router.get('/blogs', async (req, res) => {
 // --- FAQS (Public) ---
 router.get('/faqs', async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM faqs ORDER BY created_at DESC`;
+    const [rows] = await db.query('SELECT * FROM faqs ORDER BY created_at DESC');
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -159,7 +153,7 @@ router.get('/faqs', async (req, res) => {
 // --- CATEGORIES (Public) ---
 router.get('/categories', async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM categories ORDER BY name ASC`;
+    const [rows] = await db.query('SELECT * FROM categories ORDER BY name ASC');
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -169,13 +163,11 @@ router.get('/categories', async (req, res) => {
 
 router.get('/prompt/:key', async (req, res) => {
   const { key } = req.params;
-  console.log(`[DEBUG] Looking up prompt with key/slug: "${key}"`);
   try {
-    const rows = await db`
-      SELECT * FROM prompts 
-      WHERE prompt_key = ${key} OR (slug = ${key} AND slug IS NOT NULL AND slug != '')
-    `;
-    console.log(`[DEBUG] Found ${rows.length} rows`);
+    const [rows] = await db.query(
+      'SELECT * FROM prompts WHERE prompt_key = ? OR (slug = ? AND slug IS NOT NULL AND slug != "")',
+      [key, key]
+    );
     if (rows.length === 0) return res.status(404).json({ error: "Prompt not found" });
 
     const row = rows[0];
@@ -208,7 +200,7 @@ router.get('/prompt/:key', async (req, res) => {
 // --- SITE SETTINGS (Public) ---
 router.get('/settings', async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM site_settings`;
+    const [rows] = await db.query('SELECT * FROM site_settings');
     const settings = {};
     rows.forEach(r => { settings[r.setting_key] = r.setting_value; });
     res.json(settings);
@@ -216,20 +208,21 @@ router.get('/settings', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch settings" });
   }
 });
+
 router.post('/toggle_like', async (req, res) => {
   const uid = req.headers['x-user-id'] || req.session.userId;
   if (!uid) return res.status(401).json({ error: "Not logged in" });
 
   const { key } = req.body;
   try {
-    const existing = await db`SELECT * FROM user_likes WHERE user_id = ${uid} AND prompt_key = ${key}`;
+    const [existing] = await db.query('SELECT * FROM user_likes WHERE user_id = ? AND prompt_key = ?', [uid, key]);
     if (existing.length > 0) {
-      await db`DELETE FROM user_likes WHERE user_id = ${uid} AND prompt_key = ${key}`;
-      await db`UPDATE prompts SET like_count = GREATEST(0, like_count - 1) WHERE prompt_key = ${key}`;
+      await db.query('DELETE FROM user_likes WHERE user_id = ? AND prompt_key = ?', [uid, key]);
+      await db.query('UPDATE prompts SET like_count = GREATEST(0, like_count - 1) WHERE prompt_key = ?', [key]);
       res.json({ status: "removed" });
     } else {
-      await db`INSERT INTO user_likes (user_id, prompt_key) VALUES (${uid}, ${key})`;
-      await db`UPDATE prompts SET like_count = like_count + 1 WHERE prompt_key = ${key}`;
+      await db.query('INSERT INTO user_likes (user_id, prompt_key) VALUES (?, ?)', [uid, key]);
+      await db.query('UPDATE prompts SET like_count = like_count + 1 WHERE prompt_key = ?', [key]);
       res.json({ status: "added" });
     }
   } catch (error) {
@@ -243,9 +236,9 @@ router.post('/record_copy', async (req, res) => {
   const uid = req.headers['x-user-id'] || req.session.userId || null;
   const { key } = req.body;
   try {
-    await db`UPDATE prompts SET copy_count = copy_count + 1 WHERE prompt_key = ${key}`;
+    await db.query('UPDATE prompts SET copy_count = copy_count + 1 WHERE prompt_key = ?', [key]);
     if (uid) {
-      await db`INSERT INTO user_copied (user_id, prompt_key) VALUES (${uid}, ${key}) ON CONFLICT DO NOTHING`;
+      await db.query('INSERT IGNORE INTO user_copied (user_id, prompt_key) VALUES (?, ?)', [uid, key]);
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -258,7 +251,7 @@ router.post('/record_copy', async (req, res) => {
 router.post('/record_unlock', async (req, res) => {
   const { key } = req.body;
   try {
-    await db`UPDATE prompts SET unlock_count = unlock_count + 1 WHERE prompt_key = ${key}`;
+    await db.query('UPDATE prompts SET unlock_count = unlock_count + 1 WHERE prompt_key = ?', [key]);
     res.json({ status: "success" });
   } catch (error) {
     console.error(error);
@@ -272,7 +265,7 @@ router.get('/get_profile', async (req, res) => {
   if (!uid) return res.status(401).json({ error: "Not logged in" });
 
   try {
-    const rows = await db`SELECT name, email, avatar_url FROM users WHERE id = ${uid}`;
+    const [rows] = await db.query('SELECT name, email, avatar_url FROM users WHERE id = ?', [uid]);
     if (rows.length === 0) return res.status(404).json({ error: "User not found" });
 
     let userData = rows[0];
@@ -302,12 +295,12 @@ router.post('/update_profile', upload.single('avatar'), async (req, res) => {
     }
 
     if (avatarUrl) {
-      await db`UPDATE users SET name = ${name}, avatar_url = ${avatarUrl} WHERE id = ${uid}`;
+      await db.query('UPDATE users SET name = ?, avatar_url = ? WHERE id = ?', [name, avatarUrl, uid]);
     } else {
-      await db`UPDATE users SET name = ${name} WHERE id = ${uid}`;
+      await db.query('UPDATE users SET name = ? WHERE id = ?', [name, uid]);
     }
 
-    const rows = await db`SELECT name, avatar_url FROM users WHERE id = ${uid}`;
+    const [rows] = await db.query('SELECT name, avatar_url FROM users WHERE id = ?', [uid]);
     const userData = rows[0];
     
     let newAvatar = userData.avatar_url;
@@ -325,7 +318,6 @@ router.post('/update_profile', upload.single('avatar'), async (req, res) => {
 
 // --- 7. ADMIN ENDPOINTS (Restricted) ---
 const adminAuth = (req, res, next) => {
-  // For development convenience on localhost
   const isLocal = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
   const hasValidHeader = req.headers['x-admin-pin'] === (process.env.ADMIN_PASSWORD || 'admin');
 
@@ -354,10 +346,10 @@ router.post('/admin/login', (req, res) => {
   }
 });
 
-// Admin Settings (Logo & Sizes)
+// Admin Settings
 router.get('/admin/settings', adminAuth, async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM site_settings`;
+    const [rows] = await db.query('SELECT * FROM site_settings');
     const settings = {};
     rows.forEach(r => { settings[r.setting_key] = r.setting_value; });
     res.json(settings);
@@ -367,14 +359,13 @@ router.get('/admin/settings', adminAuth, async (req, res) => {
 });
 
 router.post('/admin/save_settings', adminAuth, async (req, res) => {
-  const settings = req.body; // { logo_width_desktop: '...', logo_width_mobile: '...' }
+  const settings = req.body;
   try {
     for (const [key, value] of Object.entries(settings)) {
-      await db`
-        INSERT INTO site_settings (setting_key, setting_value) 
-        VALUES (${key}, ${value}) 
-        ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
-      `;
+      await db.query(
+        'INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
+        [key, value]
+      );
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -386,11 +377,10 @@ router.post('/admin/upload_logo', adminAuth, logoUpload.single('logo'), async (r
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const logoUrl = `/uploads/${req.file.filename}`;
   try {
-    await db`
-      INSERT INTO site_settings (setting_key, setting_value) 
-      VALUES ('logo_url', ${logoUrl}) 
-      ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
-    `;
+    await db.query(
+      'INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
+      ['logo_url', logoUrl]
+    );
     res.json({ status: "success", logoUrl });
   } catch (error) {
     res.status(500).json({ error: "Logo save failed" });
@@ -410,8 +400,7 @@ router.get('/admin/logout', (req, res) => {
 
 router.get('/admin/prompts', adminAuth, async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM prompts`;
-    // Ensure numbers are returned as numbers
+    const [rows] = await db.query('SELECT * FROM prompts');
     const formatted = rows.map(r => ({
       ...r,
       copy_count: Number(r.copy_count || 0),
@@ -426,39 +415,30 @@ router.get('/admin/prompts', adminAuth, async (req, res) => {
   }
 });
 
-
 router.post('/admin/save_prompt', adminAuth, async (req, res) => {
   const p = req.body;
-  const originalKey = p.originalKey; // Only present when editing
+  const originalKey = p.originalKey;
   const newKey = p.prompt_key?.trim();
 
   try {
-    fs.appendFileSync('debug.log', `[${newKey}] original: ${originalKey}, hasBody: ${!!p}, bodyKeys: ${Object.keys(p).join(',')}\n`);
-  } catch (err) {}
-
-  try {
-    // 1. Format validation (PK + Numbers)
+    // Format validation
     if (newKey) {
       if (!/^PK[0-9]+$/.test(newKey)) {
-        fs.appendFileSync('debug.log', `REJECT_FORMAT: ${newKey}\n`);
         return res.status(400).json({ error: "Invalid ID format. Must start with 'PK' followed by numbers only (e.g. PK001)." });
       }
     }
 
-    // 2. Uniqueness check
+    // Uniqueness check
     if (newKey) {
-      fs.appendFileSync('debug.log', `CHECK_UNIQUE_START: ${newKey}\n`);
-      const existing = await db`SELECT prompt_key FROM prompts WHERE prompt_key = ${newKey}`;
-      fs.appendFileSync('debug.log', `CHECK_UNIQUE_DONE: found=${existing.length}\n`);
+      const [existing] = await db.query('SELECT prompt_key FROM prompts WHERE prompt_key = ?', [newKey]);
       if (existing.length > 0) {
         if (!originalKey || (originalKey !== newKey)) {
-          fs.appendFileSync('debug.log', `REJECT_DUPLICATE: ${newKey}\n`);
           return res.status(400).json({ error: "Choose a different ID. This ID is already taken and must be unique." });
         }
       }
     }
 
-    // 3. Unique Slug Generation
+    // Unique Slug Generation
     let finalSlug = p.slug?.trim();
     if (!finalSlug) {
       finalSlug = await generateUniqueSlug(p.title, originalKey);
@@ -467,39 +447,19 @@ router.post('/admin/save_prompt', adminAuth, async (req, res) => {
     }
 
     if (originalKey) {
-      fs.appendFileSync('debug.log', `UPDATE_START: old=${originalKey}, new=${newKey || originalKey}\n`);
-      const result = await db`
-        UPDATE prompts SET 
-          prompt_key = ${newKey || originalKey}, 
-          slug = ${finalSlug}, 
-          title = ${p.title}, 
-          description = ${p.description}, 
-          ai_type = ${p.ai_type}, 
-          prompt_text = ${p.prompt_text}, 
-          img_before = ${p.img_before}, 
-          img_after = ${p.img_after}, 
-          ig_link = ${p.ig_link}, 
-          is_image_slider = ${!!p.is_image_slider}, 
-          hide_prompt_box = ${!!p.hide_prompt_box}, 
-          image_ratio = ${p.image_ratio}, 
-          password = ${p.password}, 
-          is_premium = ${!!p.is_premium} 
-        WHERE prompt_key = ${originalKey}
-      `;
-      fs.appendFileSync('debug.log', `UPDATE_SUCCESS: count=${result.count}, oldKey=${originalKey}, newKeyRequested=${newKey}\n`);
+      await db.query(
+        `UPDATE prompts SET prompt_key = ?, slug = ?, title = ?, description = ?, ai_type = ?, prompt_text = ?, img_before = ?, img_after = ?, ig_link = ?, is_image_slider = ?, hide_prompt_box = ?, image_ratio = ?, password = ?, is_premium = ? WHERE prompt_key = ?`,
+        [newKey || originalKey, finalSlug, p.title, p.description, p.ai_type, p.prompt_text, p.img_before, p.img_after, p.ig_link, !!p.is_image_slider, !!p.hide_prompt_box, p.image_ratio, p.password, !!p.is_premium, originalKey]
+      );
     } else {
       const finalKey = newKey || ('PK' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 100));
-      await db`
-        INSERT INTO prompts 
-        (prompt_key, slug, title, description, ai_type, prompt_text, img_before, img_after, ig_link, is_image_slider, hide_prompt_box, image_ratio, password, is_premium) 
-        VALUES 
-        (${finalKey}, ${finalSlug}, ${p.title}, ${p.description}, ${p.ai_type}, ${p.prompt_text}, ${p.img_before}, ${p.img_after}, ${p.ig_link}, ${!!p.is_image_slider}, ${!!p.hide_prompt_box}, ${p.image_ratio}, ${p.password}, ${!!p.is_premium})
-      `;
-      fs.appendFileSync('debug.log', `INSERT_SUCCESS: key=${finalKey}\n`);
+      await db.query(
+        `INSERT INTO prompts (prompt_key, slug, title, description, ai_type, prompt_text, img_before, img_after, ig_link, is_image_slider, hide_prompt_box, image_ratio, password, is_premium) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [finalKey, finalSlug, p.title, p.description, p.ai_type, p.prompt_text, p.img_before, p.img_after, p.ig_link, !!p.is_image_slider, !!p.hide_prompt_box, p.image_ratio, p.password, !!p.is_premium]
+      );
     }
     res.json({ status: "success" });
   } catch (error) {
-    fs.appendFileSync('debug.log', `SAVE_ERROR: ${error.message}\n`);
     console.error(error);
     res.status(500).json({ error: "Save failed" });
   }
@@ -507,7 +467,7 @@ router.post('/admin/save_prompt', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_prompt/:key', adminAuth, async (req, res) => {
   try {
-    await db`DELETE FROM prompts WHERE prompt_key = ${req.params.key}`;
+    await db.query('DELETE FROM prompts WHERE prompt_key = ?', [req.params.key]);
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
@@ -517,7 +477,7 @@ router.delete('/admin/delete_prompt/:key', adminAuth, async (req, res) => {
 // Admin Blog CRUD
 router.get('/admin/blogs', adminAuth, async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM blogs`;
+    const [rows] = await db.query('SELECT * FROM blogs');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: "Fetch failed" });
@@ -536,9 +496,9 @@ router.post('/admin/save_blog', adminAuth, async (req, res) => {
   
   try {
     if (b.id) {
-      await db`UPDATE blogs SET title = ${b.title}, slug = ${finalSlug}, content = ${b.content}, featured_image = ${b.featured_image} WHERE id = ${b.id}`;
+      await db.query('UPDATE blogs SET title = ?, slug = ?, content = ?, featured_image = ? WHERE id = ?', [b.title, finalSlug, b.content, b.featured_image, b.id]);
     } else {
-      await db`INSERT INTO blogs (title, slug, content, featured_image) VALUES (${b.title}, ${finalSlug}, ${b.content}, ${b.featured_image})`;
+      await db.query('INSERT INTO blogs (title, slug, content, featured_image) VALUES (?, ?, ?, ?)', [b.title, finalSlug, b.content, b.featured_image]);
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -549,17 +509,17 @@ router.post('/admin/save_blog', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_blog/:id', adminAuth, async (req, res) => {
   try {
-    await db`DELETE FROM blogs WHERE id = ${req.params.id}`;
+    await db.query('DELETE FROM blogs WHERE id = ?', [req.params.id]);
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
   }
 });
 
-// FAQ CRUD Endpoints
+// FAQ CRUD
 router.get('/admin/faqs', adminAuth, async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM faqs`;
+    const [rows] = await db.query('SELECT * FROM faqs');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: "Fetch failed" });
@@ -570,9 +530,9 @@ router.post('/admin/save_faq', adminAuth, async (req, res) => {
   const f = req.body;
   try {
     if (f.id) {
-      await db`UPDATE faqs SET question = ${f.question}, answer = ${f.answer}, category = ${f.category} WHERE id = ${f.id}`;
+      await db.query('UPDATE faqs SET question = ?, answer = ?, category = ? WHERE id = ?', [f.question, f.answer, f.category, f.id]);
     } else {
-      await db`INSERT INTO faqs (question, answer, category) VALUES (${f.question}, ${f.answer}, ${f.category})`;
+      await db.query('INSERT INTO faqs (question, answer, category) VALUES (?, ?, ?)', [f.question, f.answer, f.category]);
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -582,7 +542,7 @@ router.post('/admin/save_faq', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_faq/:id', adminAuth, async (req, res) => {
   try {
-    await db`DELETE FROM faqs WHERE id = ${req.params.id}`;
+    await db.query('DELETE FROM faqs WHERE id = ?', [req.params.id]);
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
@@ -592,7 +552,7 @@ router.delete('/admin/delete_faq/:id', adminAuth, async (req, res) => {
 // Admin Category CRUD
 router.get('/admin/categories', adminAuth, async (req, res) => {
   try {
-    const rows = await db`SELECT * FROM categories ORDER BY name ASC`;
+    const [rows] = await db.query('SELECT * FROM categories ORDER BY name ASC');
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: "Fetch failed" });
@@ -604,9 +564,9 @@ router.post('/admin/save_category', adminAuth, async (req, res) => {
   const slug = c.slug || c.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
   try {
     if (c.id) {
-      await db`UPDATE categories SET name = ${c.name}, slug = ${slug} WHERE id = ${c.id}`;
+      await db.query('UPDATE categories SET name = ?, slug = ? WHERE id = ?', [c.name, slug, c.id]);
     } else {
-      await db`INSERT INTO categories (name, slug) VALUES (${c.name}, ${slug})`;
+      await db.query('INSERT INTO categories (name, slug) VALUES (?, ?)', [c.name, slug]);
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -616,7 +576,7 @@ router.post('/admin/save_category', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_category/:id', adminAuth, async (req, res) => {
   try {
-    await db`DELETE FROM categories WHERE id = ${req.params.id}`;
+    await db.query('DELETE FROM categories WHERE id = ?', [req.params.id]);
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
