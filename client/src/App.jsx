@@ -43,6 +43,7 @@ function AppContent() {
   const [profileData, setProfileData] = useState({ name: '', email: '', avatar_url: '' });
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [settings, setSettings] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = window.location.pathname;
@@ -59,17 +60,18 @@ function AppContent() {
     }
   };
 
-  const fetchSettings = async () => {
+  const fetchAdminStatus = async () => {
     try {
-      const response = await api.get('/settings');
-      setSettings(response.data);
+      const response = await api.get('/admin/check_auth');
+      setIsAdmin(response.data.isAdmin);
     } catch (error) {
-      console.error("App: Failed to fetch settings", error);
+      console.error("App: Failed to fetch admin status", error);
     }
   };
 
   useEffect(() => {
     fetchSettings();
+    fetchAdminStatus();
     
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -88,6 +90,7 @@ function AppContent() {
           });
           setUser(firebaseUser);
           fetchProfile();
+          fetchAdminStatus();
         } catch (error) {
           console.error("App: Backend login failed", error);
         }
@@ -95,6 +98,7 @@ function AppContent() {
         delete api.defaults.headers.common['X-User-Id'];
         setUser(null);
         setProfileData({ name: '', email: '', avatar_url: '' });
+        fetchAdminStatus();
       }
     });
 
@@ -123,6 +127,7 @@ function AppContent() {
           setFilter={setFilter}
           onLogoClick={resetHome}
           settings={settings}
+          isAdmin={isAdmin}
         />
       )}
       <div style={{ paddingTop: isAdminPath ? '0' : (isMobile ? '85px' : '130px'), transition: 'padding-top 0.3s ease' }}>
