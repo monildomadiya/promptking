@@ -47,7 +47,7 @@ function AppContent() {
   const [settings, setSettings] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
-  const isAdminPath = location.pathname === '/admin';
+  const isAdminPath = location.pathname.startsWith('/admin');
 
   const fetchProfile = async () => {
     try {
