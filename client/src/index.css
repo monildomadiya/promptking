@@ -197,8 +197,8 @@ button:active {
   width: 100%;
 }
 
-/* Smaller Desktop / Large Tablet */
-@media (max-width: 1200px) {
+/* Tablet / Small Laptop */
+@media (max-width: 950px) {
   .masonry-grid {
     column-count: 2;
   }
