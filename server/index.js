@@ -39,7 +39,7 @@ app.get('/api/health-check', async (req, res) => {
   
   try {
     const db = require('./db');
-    await db.query('SELECT 1');
+    await db`SELECT 1`;
     dbStatus = "Connected";
   } catch (err) {
     dbStatus = "Failed";
@@ -50,7 +50,7 @@ app.get('/api/health-check', async (req, res) => {
     status: "online",
     database: dbStatus,
     databaseError: dbError,
-    dbType: "MySQL"
+    dbType: "PostgreSQL"
   });
 });
 

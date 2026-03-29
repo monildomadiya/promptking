@@ -34,10 +34,11 @@ const generateUniqueSlug = async (title, currentId = null, table = 'prompts', id
   let exists = true;
 
   while (exists) {
-    const [rows] = await db.query(
-      `SELECT ${idColumn} FROM ${table} WHERE slug = ? AND ${idColumn} != ?`,
-      [uniqueSlug, currentId || '']
-    );
+    const rows = await db`
+      SELECT ${db(idColumn)} 
+      FROM ${db(table)} 
+      WHERE slug = ${uniqueSlug} AND ${db(idColumn)} != ${currentId || ''}
+    `;
     if (rows.length === 0) {
       exists = false;
     } else {
@@ -71,11 +72,16 @@ const logoUpload = multer({
 router.post('/login', async (req, res) => {
   const { uid, name, email, picture } = req.body;
   try {
-    await db.query(
-      `INSERT INTO users (id, name, email, avatar_url) VALUES (?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE name = VALUES(name), avatar_url = CASE WHEN users.avatar_url IS NULL OR users.avatar_url = '' THEN VALUES(avatar_url) ELSE users.avatar_url END`,
-      [uid, name, email, picture]
-    );
+    await db`
+      INSERT INTO users (id, name, email, avatar_url) 
+      VALUES (${uid}, ${name}, ${email}, ${picture})
+      ON CONFLICT (id) DO UPDATE SET 
+        name = EXCLUDED.name, 
+        avatar_url = CASE 
+          WHEN users.avatar_url IS NULL OR users.avatar_url = '' THEN EXCLUDED.avatar_url 
+          ELSE users.avatar_url 
+        END
+    `;
     req.session.userId = uid;
     res.json({ status: "success" });
   } catch (error) {
@@ -93,8 +99,8 @@ router.get('/logout', (req, res) => {
 router.get('/get_data', async (req, res) => {
   const uid = req.headers['x-user-id'] || req.session.userId || null;
   try {
-    const [promptsRows] = await db.query('SELECT * FROM prompts');
-    const [categoriesRows] = await db.query('SELECT * FROM categories ORDER BY name ASC');
+    const promptsRows = await db`SELECT * FROM prompts`;
+    const categoriesRows = await db`SELECT * FROM categories ORDER BY name ASC`;
 
     const prompts = promptsRows.map(row => ({
       ...row,
@@ -118,7 +124,7 @@ router.get('/get_data', async (req, res) => {
 
     let likes = {};
     if (uid) {
-      const [likeRows] = await db.query('SELECT prompt_key FROM user_likes WHERE user_id = ?', [uid]);
+      const likeRows = await db`SELECT prompt_key FROM user_likes WHERE user_id = ${uid}`;
       likeRows.forEach(l => likes[l.prompt_key] = true);
     }
     res.json({ prompts, likes, categories: categoriesRows });
@@ -131,7 +137,7 @@ router.get('/get_data', async (req, res) => {
 // --- BLOGS (Public) ---
 router.get('/blogs', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM blogs ORDER BY created_at DESC');
+    const rows = await db`SELECT * FROM blogs ORDER BY created_at DESC`;
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -142,7 +148,7 @@ router.get('/blogs', async (req, res) => {
 // --- FAQS (Public) ---
 router.get('/faqs', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM faqs ORDER BY created_at DESC');
+    const rows = await db`SELECT * FROM faqs ORDER BY created_at DESC`;
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -164,10 +170,10 @@ router.get('/categories', async (req, res) => {
 router.get('/prompt/:key', async (req, res) => {
   const { key } = req.params;
   try {
-    const [rows] = await db.query(
-      'SELECT * FROM prompts WHERE prompt_key = ? OR (slug = ? AND slug IS NOT NULL AND slug != "")',
-      [key, key]
-    );
+    const rows = await db`
+      SELECT * FROM prompts 
+      WHERE prompt_key = ${key} OR (slug = ${key} AND slug IS NOT NULL AND slug != '')
+    `;
     if (rows.length === 0) return res.status(404).json({ error: "Prompt not found" });
 
     const row = rows[0];
@@ -215,14 +221,14 @@ router.post('/toggle_like', async (req, res) => {
 
   const { key } = req.body;
   try {
-    const [existing] = await db.query('SELECT * FROM user_likes WHERE user_id = ? AND prompt_key = ?', [uid, key]);
+    const existing = await db`SELECT * FROM user_likes WHERE user_id = ${uid} AND prompt_key = ${key}`;
     if (existing.length > 0) {
-      await db.query('DELETE FROM user_likes WHERE user_id = ? AND prompt_key = ?', [uid, key]);
-      await db.query('UPDATE prompts SET like_count = GREATEST(0, like_count - 1) WHERE prompt_key = ?', [key]);
+      await db`DELETE FROM user_likes WHERE user_id = ${uid} AND prompt_key = ${key}`;
+      await db`UPDATE prompts SET like_count = GREATEST(0, like_count - 1) WHERE prompt_key = ${key}`;
       res.json({ status: "removed" });
     } else {
-      await db.query('INSERT INTO user_likes (user_id, prompt_key) VALUES (?, ?)', [uid, key]);
-      await db.query('UPDATE prompts SET like_count = like_count + 1 WHERE prompt_key = ?', [key]);
+      await db`INSERT INTO user_likes (user_id, prompt_key) VALUES (${uid}, ${key})`;
+      await db`UPDATE prompts SET like_count = like_count + 1 WHERE prompt_key = ${key}`;
       res.json({ status: "added" });
     }
   } catch (error) {
@@ -236,9 +242,9 @@ router.post('/record_copy', async (req, res) => {
   const uid = req.headers['x-user-id'] || req.session.userId || null;
   const { key } = req.body;
   try {
-    await db.query('UPDATE prompts SET copy_count = copy_count + 1 WHERE prompt_key = ?', [key]);
+    await db`UPDATE prompts SET copy_count = copy_count + 1 WHERE prompt_key = ${key}`;
     if (uid) {
-      await db.query('INSERT IGNORE INTO user_copied (user_id, prompt_key) VALUES (?, ?)', [uid, key]);
+      await db`INSERT INTO user_copied (user_id, prompt_key) VALUES (${uid}, ${key}) ON CONFLICT DO NOTHING`;
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -251,7 +257,7 @@ router.post('/record_copy', async (req, res) => {
 router.post('/record_unlock', async (req, res) => {
   const { key } = req.body;
   try {
-    await db.query('UPDATE prompts SET unlock_count = unlock_count + 1 WHERE prompt_key = ?', [key]);
+    await db`UPDATE prompts SET unlock_count = unlock_count + 1 WHERE prompt_key = ${key}`;
     res.json({ status: "success" });
   } catch (error) {
     console.error(error);
@@ -265,7 +271,7 @@ router.get('/get_profile', async (req, res) => {
   if (!uid) return res.status(401).json({ error: "Not logged in" });
 
   try {
-    const [rows] = await db.query('SELECT name, email, avatar_url FROM users WHERE id = ?', [uid]);
+    const rows = await db`SELECT name, email, avatar_url FROM users WHERE id = ${uid}`;
     if (rows.length === 0) return res.status(404).json({ error: "User not found" });
 
     let userData = rows[0];
@@ -295,12 +301,13 @@ router.post('/update_profile', upload.single('avatar'), async (req, res) => {
     }
 
     if (avatarUrl) {
-      await db.query('UPDATE users SET name = ?, avatar_url = ? WHERE id = ?', [name, avatarUrl, uid]);
+      await db`UPDATE users SET name = ${name}, avatar_url = ${avatarUrl} WHERE id = ${uid}`;
     } else {
-      await db.query('UPDATE users SET name = ? WHERE id = ?', [name, uid]);
+      await db`UPDATE users SET name = ${name} WHERE id = ${uid}`;
     }
 
-    const [rows] = await db.query('SELECT name, avatar_url FROM users WHERE id = ?', [uid]);
+    const rows = await db`SELECT name, avatar_url FROM users WHERE id = ${uid}`;
+    if (rows.length === 0) return res.status(404).json({ error: "User not found" });
     const userData = rows[0];
     
     let newAvatar = userData.avatar_url;
@@ -362,10 +369,11 @@ router.post('/admin/save_settings', adminAuth, async (req, res) => {
   const settings = req.body;
   try {
     for (const [key, value] of Object.entries(settings)) {
-      await db.query(
-        'INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
-        [key, value]
-      );
+      await db`
+        INSERT INTO site_settings (setting_key, setting_value) 
+        VALUES (${key}, ${value}) 
+        ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
+      `;
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -377,10 +385,11 @@ router.post('/admin/upload_logo', adminAuth, logoUpload.single('logo'), async (r
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
   const logoUrl = `/uploads/${req.file.filename}`;
   try {
-    await db.query(
-      'INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
-      ['logo_url', logoUrl]
-    );
+    await db`
+      INSERT INTO site_settings (setting_key, setting_value) 
+      VALUES ('logo_url', ${logoUrl}) 
+      ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
+    `;
     res.json({ status: "success", logoUrl });
   } catch (error) {
     res.status(500).json({ error: "Logo save failed" });
@@ -400,7 +409,7 @@ router.get('/admin/logout', (req, res) => {
 
 router.get('/admin/prompts', adminAuth, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM prompts');
+    const rows = await db`SELECT * FROM prompts`;
     const formatted = rows.map(r => ({
       ...r,
       copy_count: Number(r.copy_count || 0),
@@ -430,7 +439,7 @@ router.post('/admin/save_prompt', adminAuth, async (req, res) => {
 
     // Uniqueness check
     if (newKey) {
-      const [existing] = await db.query('SELECT prompt_key FROM prompts WHERE prompt_key = ?', [newKey]);
+      const existing = await db`SELECT prompt_key FROM prompts WHERE prompt_key = ${newKey}`;
       if (existing.length > 0) {
         if (!originalKey || (originalKey !== newKey)) {
           return res.status(400).json({ error: "Choose a different ID. This ID is already taken and must be unique." });
@@ -447,16 +456,36 @@ router.post('/admin/save_prompt', adminAuth, async (req, res) => {
     }
 
     if (originalKey) {
-      await db.query(
-        `UPDATE prompts SET prompt_key = ?, slug = ?, title = ?, description = ?, ai_type = ?, prompt_text = ?, img_before = ?, img_after = ?, ig_link = ?, is_image_slider = ?, hide_prompt_box = ?, image_ratio = ?, password = ?, is_premium = ? WHERE prompt_key = ?`,
-        [newKey || originalKey, finalSlug, p.title, p.description, p.ai_type, p.prompt_text, p.img_before, p.img_after, p.ig_link, !!p.is_image_slider, !!p.hide_prompt_box, p.image_ratio, p.password, !!p.is_premium, originalKey]
-      );
+      await db`
+        UPDATE prompts SET 
+          prompt_key = ${newKey || originalKey}, 
+          slug = ${finalSlug}, 
+          title = ${p.title}, 
+          description = ${p.description}, 
+          ai_type = ${p.ai_type}, 
+          prompt_text = ${p.prompt_text}, 
+          img_before = ${p.img_before}, 
+          img_after = ${p.img_after}, 
+          ig_link = ${p.ig_link}, 
+          is_image_slider = ${!!p.is_image_slider}, 
+          hide_prompt_box = ${!!p.hide_prompt_box}, 
+          image_ratio = ${p.image_ratio}, 
+          password = ${p.password}, 
+          is_premium = ${!!p.is_premium} 
+        WHERE prompt_key = ${originalKey}
+      `;
     } else {
       const finalKey = newKey || ('PK' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 100));
-      await db.query(
-        `INSERT INTO prompts (prompt_key, slug, title, description, ai_type, prompt_text, img_before, img_after, ig_link, is_image_slider, hide_prompt_box, image_ratio, password, is_premium) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [finalKey, finalSlug, p.title, p.description, p.ai_type, p.prompt_text, p.img_before, p.img_after, p.ig_link, !!p.is_image_slider, !!p.hide_prompt_box, p.image_ratio, p.password, !!p.is_premium]
-      );
+      await db`
+        INSERT INTO prompts (
+          prompt_key, slug, title, description, ai_type, prompt_text, img_before, img_after, 
+          ig_link, is_image_slider, hide_prompt_box, image_ratio, password, is_premium
+        ) VALUES (
+          ${finalKey}, ${finalSlug}, ${p.title}, ${p.description}, ${p.ai_type}, ${p.prompt_text}, 
+          ${p.img_before}, ${p.img_after}, ${p.ig_link}, ${!!p.is_image_slider}, 
+          ${!!p.hide_prompt_box}, ${p.image_ratio}, ${p.password}, ${!!p.is_premium}
+        )
+      `;
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -467,7 +496,7 @@ router.post('/admin/save_prompt', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_prompt/:key', adminAuth, async (req, res) => {
   try {
-    await db.query('DELETE FROM prompts WHERE prompt_key = ?', [req.params.key]);
+    await db`DELETE FROM prompts WHERE prompt_key = ${req.params.key}`;
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
@@ -477,7 +506,7 @@ router.delete('/admin/delete_prompt/:key', adminAuth, async (req, res) => {
 // Admin Blog CRUD
 router.get('/admin/blogs', adminAuth, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM blogs');
+    const rows = await db`SELECT * FROM blogs`;
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: "Fetch failed" });
@@ -496,9 +525,9 @@ router.post('/admin/save_blog', adminAuth, async (req, res) => {
   
   try {
     if (b.id) {
-      await db.query('UPDATE blogs SET title = ?, slug = ?, content = ?, featured_image = ? WHERE id = ?', [b.title, finalSlug, b.content, b.featured_image, b.id]);
+      await db`UPDATE blogs SET title = ${b.title}, slug = ${finalSlug}, content = ${b.content}, featured_image = ${b.featured_image} WHERE id = ${b.id}`;
     } else {
-      await db.query('INSERT INTO blogs (title, slug, content, featured_image) VALUES (?, ?, ?, ?)', [b.title, finalSlug, b.content, b.featured_image]);
+      await db`INSERT INTO blogs (title, slug, content, featured_image) VALUES (${b.title}, ${finalSlug}, ${b.content}, ${b.featured_image})`;
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -509,7 +538,7 @@ router.post('/admin/save_blog', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_blog/:id', adminAuth, async (req, res) => {
   try {
-    await db.query('DELETE FROM blogs WHERE id = ?', [req.params.id]);
+    await db`DELETE FROM blogs WHERE id = ${req.params.id}`;
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
@@ -519,7 +548,7 @@ router.delete('/admin/delete_blog/:id', adminAuth, async (req, res) => {
 // FAQ CRUD
 router.get('/admin/faqs', adminAuth, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM faqs');
+    const rows = await db`SELECT * FROM faqs`;
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: "Fetch failed" });
@@ -530,9 +559,9 @@ router.post('/admin/save_faq', adminAuth, async (req, res) => {
   const f = req.body;
   try {
     if (f.id) {
-      await db.query('UPDATE faqs SET question = ?, answer = ?, category = ? WHERE id = ?', [f.question, f.answer, f.category, f.id]);
+      await db`UPDATE faqs SET question = ${f.question}, answer = ${f.answer}, category = ${f.category} WHERE id = ${f.id}`;
     } else {
-      await db.query('INSERT INTO faqs (question, answer, category) VALUES (?, ?, ?)', [f.question, f.answer, f.category]);
+      await db`INSERT INTO faqs (question, answer, category) VALUES (${f.question}, ${f.answer}, ${f.category})`;
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -542,7 +571,7 @@ router.post('/admin/save_faq', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_faq/:id', adminAuth, async (req, res) => {
   try {
-    await db.query('DELETE FROM faqs WHERE id = ?', [req.params.id]);
+    await db`DELETE FROM faqs WHERE id = ${req.params.id}`;
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
@@ -564,9 +593,9 @@ router.post('/admin/save_category', adminAuth, async (req, res) => {
   const slug = c.slug || c.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
   try {
     if (c.id) {
-      await db.query('UPDATE categories SET name = ?, slug = ? WHERE id = ?', [c.name, slug, c.id]);
+      await db`UPDATE categories SET name = ${c.name}, slug = ${slug} WHERE id = ${c.id}`;
     } else {
-      await db.query('INSERT INTO categories (name, slug) VALUES (?, ?)', [c.name, slug]);
+      await db`INSERT INTO categories (name, slug) VALUES (${c.name}, ${slug})`;
     }
     res.json({ status: "success" });
   } catch (error) {
@@ -576,7 +605,7 @@ router.post('/admin/save_category', adminAuth, async (req, res) => {
 
 router.delete('/admin/delete_category/:id', adminAuth, async (req, res) => {
   try {
-    await db.query('DELETE FROM categories WHERE id = ?', [req.params.id]);
+    await db`DELETE FROM categories WHERE id = ${req.params.id}`;
     res.json({ status: "success" });
   } catch (error) {
     res.status(500).json({ error: "Delete failed" });
