@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import BottomNav from './components/Layout/BottomNav';
@@ -46,8 +46,8 @@ function AppContent() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [settings, setSettings] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const location = window.location.pathname;
-  const isAdminPath = location === '/admin';
+  const location = useLocation();
+  const isAdminPath = location.pathname === '/admin';
 
   const fetchProfile = async () => {
     try {
