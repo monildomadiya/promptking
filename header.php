@@ -155,7 +155,7 @@ $main_site_logo = (!empty($site_logo_files)) ? $site_logo_files[0] . '?v=' . tim
         .filter-btn:hover { border-color: rgba(255,255,255,0.3); }
         .filter-btn.active { background: var(--accent-main); border-color: var(--accent-main); color: white; }
         
-        #cardContainer, #skeletonContainer { column-count: 1; column-gap: 30px; width: 100%; padding-top: 10px; }
+        #cardContainer, #skeletonContainer { column-count: 1; column-gap: 20px; width: 100%; padding-top: 10px; }
         @media (min-width: 769px) { #cardContainer, #skeletonContainer { column-count: 3; } } 
         @media (min-width: 1251px) { #cardContainer, #skeletonContainer { column-count: 3; } } 
         

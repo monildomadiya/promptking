@@ -186,7 +186,7 @@ button:active {
 /* Responsive Masonry Layout */
 .masonry-grid {
   column-count: 3;
-  column-gap: 30px;
+  column-gap: 20px;
   width: 100%;
 }
 
@@ -497,8 +497,8 @@ mark {
 /* Home Page Layout with Sidebar */
 .home-layout-grid {
   display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 35px;
+  grid-template-columns: 1fr 240px;
+  gap: 25px;
   margin-top: 40px;
 }
 
