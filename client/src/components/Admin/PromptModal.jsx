@@ -11,13 +11,8 @@ const PromptModal = ({ prompt, onClose, onSave }) => {
     description: '',
     ai_type: 'ChatGPT',
     password: '',
-    hide_prompt_box: false,
-    is_image_slider: false,
-    ig_link: '',
-    prompt_text: '',
-    img_before: '',
-    img_after: '',
-    is_premium: true
+    is_premium: true,
+    image_ratio: '4 / 5'
   });
   const [originalKey, setOriginalKey] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -208,7 +203,7 @@ const PromptModal = ({ prompt, onClose, onSave }) => {
                 <div style={{ display: 'flex', gap: '30px', marginTop: '15px' }}>
                   <Checkbox label="Hide Prompt Panel" checked={formData.hide_prompt_box} onChange={(val) => setFormData({...formData, hide_prompt_box: val})} />
                   <Checkbox label="Enable Contrast Slider" checked={formData.is_image_slider} onChange={(val) => setFormData({...formData, is_image_slider: val})} />
-                  <Checkbox label="Premium Content" premium checked={formData.is_premium} onChange={(val) => setFormData({...formData, is_premium: val})} />
+                  <Checkbox label="Premium Content" premium checked={formData.is_premium} onChange={(val) => setFormData({...formData, is_premium: val, password: val ? formData.password : ''})} />
                 </div>
               </div>
             </div>
@@ -256,17 +251,19 @@ const PromptModal = ({ prompt, onClose, onSave }) => {
               <SectionTitle title="Access & Monetization" />
             </div>
 
-            <div style={{ gridColumn: 'span 1' }}>
-              <Label text="Unlock PIN Code" />
-              <input 
-                type="text" 
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="glass-input"
-                placeholder="4-8 Digit PIN"
-                style={{ width: '100%', padding: '14px', borderRadius: '14px' }}
-              />
-            </div>
+            {formData.is_premium && (
+              <div style={{ gridColumn: 'span 1' }}>
+                <Label text="Unlock PIN Code" />
+                <input 
+                  type="text" 
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="glass-input"
+                  placeholder="4-8 Digit PIN"
+                  style={{ width: '100%', padding: '14px', borderRadius: '14px' }}
+                />
+              </div>
+            )}
 
             <div style={{ gridColumn: 'span 1' }}>
               <Label text="Monetization URL (YT Shorts)" />
