@@ -185,8 +185,10 @@ button:active {
 
 /* Responsive Masonry Layout */
 .masonry-grid {
+  display: block;
+  column-width: 350px;
   column-count: 3;
-  column-gap: 20px;
+  column-gap: 25px;
   width: 100%;
 }
 
@@ -658,9 +660,10 @@ mark {
   display: grid;
   grid-template-columns: 1fr 280px;
   gap: 40px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 20px;
+  width: 100%;
 }
 
 .layout-with-sidebar > *:last-child {
