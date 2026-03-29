@@ -115,7 +115,7 @@ function AppContent() {
 
   return (
     <div className="App">
-      <GoogleAdSense settings={settings} />
+      {!isAdminPath && <GoogleAdSense settings={settings} />}
       {!isAdminPath && (
         <Header 
           user={user} 
