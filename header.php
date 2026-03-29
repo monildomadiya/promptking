@@ -156,8 +156,8 @@ $main_site_logo = (!empty($site_logo_files)) ? $site_logo_files[0] . '?v=' . tim
         .filter-btn.active { background: var(--accent-main); border-color: var(--accent-main); color: white; }
         
         #cardContainer, #skeletonContainer { column-count: 1; column-gap: 30px; width: 100%; padding-top: 10px; }
-        @media (min-width: 601px) { #cardContainer, #skeletonContainer { column-count: 2; } } 
-        @media (min-width: 951px) { #cardContainer, #skeletonContainer { column-count: 3; } } 
+        @media (min-width: 769px) { #cardContainer, #skeletonContainer { column-count: 3; } } 
+        @media (min-width: 1251px) { #cardContainer, #skeletonContainer { column-count: 3; } } 
         
         .pro-card { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 18px; width: 100%; box-sizing: border-box; transition: all 0.4s ease; animation: fadeUp 0.6s ease-out forwards; opacity: 0; transform: translateY(20px); display: block; margin-bottom: 25px; break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; overflow: hidden; }
         .pro-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.25); box-shadow: 0 15px 35px rgba(0,0,0,0.6); }

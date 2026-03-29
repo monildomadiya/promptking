@@ -197,22 +197,11 @@ button:active {
   width: 100%;
 }
 
-/* Tablet / Small Laptop */
-@media (max-width: 950px) {
-  .masonry-grid {
-    column-count: 2;
-  }
-}
-
-/* Mobile */
+/* Small Tablet / Mobile */
 @media (max-width: 768px) {
   .masonry-grid {
-    column-count: 1 !important;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    column-count: 2 !important;
   }
-  
   .masonry-grid-item {
     width: 100%;
     max-width: 100vw;
@@ -680,14 +669,14 @@ mark {
   height: fit-content;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1250px) {
   .layout-with-sidebar {
     grid-template-columns: 1fr;
     gap: 30px;
     padding: 20px;
   }
 }
-@media (max-width: 1024px) {
+@media (max-width: 1250px) {
   .home-layout-grid {
     grid-template-columns: 1fr;
     margin-top: 0px;
